@@ -55,7 +55,7 @@ async function handleGoogleAuth() {
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: getSiteBaseUrl() + '/openprep.html' }
+    options: { redirectTo: getSiteBaseUrl() + '/index.html' }
   });
 
   if (error) {
@@ -97,7 +97,7 @@ async function handleSignin(e) {
     return;
   }
 
-  window.location.href = getSiteBaseUrl() + '/openprep.html';
+  window.location.href = getSiteBaseUrl() + '/index.html';
 }
 
 
