@@ -76,6 +76,19 @@ nav{
 }
 .nav-cta:hover{ opacity:.8; }
 
+.nav-links a:focus-visible,
+.nav-cta:focus-visible,
+.btn-primary:focus-visible,
+.btn-ghost:focus-visible,
+.tab:focus-visible,
+.fc-btn:focus-visible,
+.flip-hint:focus-visible,
+.oss-link:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+  border-radius:6px;
+}
+
 /* ─── HERO ────────────────────────────────────────── */
 .hero{
   padding:100px 48px 80px;
@@ -168,6 +181,7 @@ h1 em{
 
 /* ─── COVERAGE ────────────────────────────────────── */
 .coverage{
+  text-decoration: none;
   padding:72px 48px;
   max-width:960px;
   margin:0 auto;
@@ -180,23 +194,67 @@ h1 em{
   color:var(--muted);
   margin-bottom:40px;
 }
+
+/* GRID LAYOUT */
 .exam-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
 }
+
+/* CARD */
 .exam-card{
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:28px 26px;
-  background:#fff;
-  transition:border-color .25s, box-shadow .25s;
-  cursor:default;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 26px;
+  background: #fff;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  text-decoration: none;
 }
+
 .exam-card:hover{
-  border-color:var(--accent);
-  box-shadow:0 4px 20px rgba(26,107,69,.08);
+  border-color: var(--accent);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+  transform: translateY(-3px);
 }
+
+/* UNIVERSITY LOGO */
+.university-logo{
+  height: 55px;
+  width: auto;
+  object-fit: contain;
+  margin: 8px 0 12px 0;
+}
+
+/* TITLE */
+.exam-card h3{
+  font-family:var(--serif);
+  font-size: 20px;
+  font-weight:400;
+  margin: 0;
+}
+
+/* DESCRIPTION */
+.exam-card p{
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* META INFO */
+.exam-meta{
+  display: flex;
+  gap:16px;
+  justify-content: center;
+  font-size: 13px;
+  margin-top: auto;
+  color: var(--ink);
+}
+
 .exam-tag{
   display:inline-block;
   font-size:11px;
@@ -209,23 +267,13 @@ h1 em{
   border-radius:4px;
   margin-bottom:16px;
 }
-.exam-card h3{
-  font-family:var(--serif);
-  font-size:22px;
-  margin-bottom:8px;
-  font-weight:400;
-}
-.exam-card p{
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.6;
-  margin-bottom:18px;
-}
-.exam-meta{ display:flex; gap:16px; }
 .exam-meta span{ font-size:12px; color:var(--muted); }
 .exam-meta strong{ color:var(--ink); font-weight:500; }
 
 /* ─── FLASHCARD SECTION ───────────────────────────── */
+.demo-section.disabled {
+  display: none;
+}
 .demo-section{
   padding:72px 48px;
   background:#fff;
@@ -307,6 +355,8 @@ h1 em{
 .card-subject{ font-size:12px; color:var(--muted); }
 
 .flip-hint{
+  background:none;
+  border:none;
   font-size:12px;
   color:var(--accent);
   cursor:pointer;
@@ -332,6 +382,7 @@ h1 em{
   overflow:hidden;
 }
 .fc-progress-fill{
+  width:20%;
   height:100%;
   background:var(--accent);
   border-radius:2px;
@@ -426,7 +477,8 @@ h1 em{
 }
 .tab.active{
   color:var(--ink);
-  border-bottom-color:var(--ink);
+  border-bottom-color:var(--accent);
+  background:var(--accent-light);
   font-weight:500;
 }
 
@@ -447,8 +499,9 @@ footer p{ font-size:12px; color:var(--muted); }
   .hero{ padding:60px 24px 48px; }
   .coverage{ padding:48px 24px; }
   .exam-grid{ grid-template-columns:1fr; }
+  .university-logo{ height:48px; }
   .demo-section{ padding:48px 24px; }
   .oss-section{ padding:48px 24px; flex-direction:column; gap:24px; }
-  footer{ padding:24px; flex-direction:column; gap:8px; text-align:center; }
+  footer{ padding:24px; flex-direction:column; justify-content:flex-start; gap:10px; text-align:center; }
   .divider{ margin:0 24px; }
 }

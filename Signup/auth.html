@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>OpenPrep.pk — Sign In</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="auth.css"/>
+</head>
+<body>
+
+  <!-- ── BACKGROUND GRID ───────────────────────────── -->
+  <div class="bg-grid"></div>
+
+  <!-- ── CARD ──────────────────────────────────────── -->
+  <main class="auth-wrapper">
+
+    <!-- Logo -->
+    <a href="openprep.html" class="logo">Open<span>Prep</span>.pk</a>
+
+    <!-- Tab switcher -->
+    <div class="tab-switcher">
+      <button class="tab-btn active" id="signinTab" onclick="switchTab('signin')">Sign in</button>
+      <button class="tab-btn"        id="signupTab" onclick="switchTab('signup')">Sign up</button>
+    </div>
+
+    <!-- ── SIGN IN FORM ───────────────────────────── -->
+    <div class="form-panel" id="signinPanel">
+
+      <div class="form-header">
+        <h1>Welcome back</h1>
+        <p>Pick up right where you left off.</p>
+      </div>
+
+      <!-- Google button -->
+      <button class="btn-google" id="googleSigninBtn" onclick="handleGoogleAuth()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider-row"><span>or sign in with email</span></div>
+
+      <form id="signinForm" onsubmit="handleSignin(event)" novalidate>
+
+        <div class="field-group">
+          <label for="signinEmail">Email address</label>
+          <input type="email" id="signinEmail" placeholder="you@example.com" autocomplete="email"/>
+          <span class="field-error" id="signinEmailErr"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="signinPassword">
+            Password
+            <a href="#" class="forgot-link" onclick="showForgot(event)">Forgot password?</a>
+          </label>
+          <div class="input-wrap">
+            <input type="password" id="signinPassword" placeholder="••••••••" autocomplete="current-password"/>
+            <button type="button" class="toggle-pw" onclick="togglePassword('signinPassword', this)" aria-label="Show password">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="field-error" id="signinPasswordErr"></span>
+        </div>
+
+        <div id="signinAlert" class="form-alert" style="display:none"></div>
+
+        <button type="submit" class="btn-submit" id="signinSubmit">
+          <span class="btn-label">Sign in</span>
+          <span class="btn-spinner" style="display:none"></span>
+        </button>
+
+      </form>
+    </div>
+
+    <!-- ── SIGN UP FORM ───────────────────────────── -->
+    <div class="form-panel" id="signupPanel" style="display:none">
+
+      <div class="form-header">
+        <h1>Create your account</h1>
+        <p>Free forever. No credit card needed.</p>
+      </div>
+
+      <!-- Google button -->
+      <button class="btn-google" id="googleSignupBtn" onclick="handleGoogleAuth()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <div class="divider-row"><span>or sign up with email</span></div>
+
+      <form id="signupForm" onsubmit="handleSignup(event)" novalidate>
+
+        <div class="field-row">
+          <div class="field-group">
+            <label for="signupFirst">First name</label>
+            <input type="text" id="signupFirst" placeholder="Ahmed" autocomplete="given-name"/>
+            <span class="field-error" id="signupFirstErr"></span>
+          </div>
+          <div class="field-group">
+            <label for="signupLast">Last name</label>
+            <input type="text" id="signupLast" placeholder="Khan" autocomplete="family-name"/>
+            <span class="field-error" id="signupLastErr"></span>
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label for="signupEmail">Email address</label>
+          <input type="email" id="signupEmail" placeholder="you@example.com" autocomplete="email"/>
+          <span class="field-error" id="signupEmailErr"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="signupPassword">Password</label>
+          <div class="input-wrap">
+            <input type="password" id="signupPassword" placeholder="Min. 8 characters" autocomplete="new-password"/>
+            <button type="button" class="toggle-pw" onclick="togglePassword('signupPassword', this)" aria-label="Show password">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <div class="pw-strength" id="pwStrength" style="display:none">
+            <div class="pw-bar"><div class="pw-fill" id="pwFill"></div></div>
+            <span class="pw-label" id="pwLabel"></span>
+          </div>
+          <span class="field-error" id="signupPasswordErr"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="signupConfirm">Confirm password</label>
+          <div class="input-wrap">
+            <input type="password" id="signupConfirm" placeholder="Repeat password" autocomplete="new-password"/>
+            <button type="button" class="toggle-pw" onclick="togglePassword('signupConfirm', this)" aria-label="Show password">
+              <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+          <span class="field-error" id="signupConfirmErr"></span>
+        </div>
+
+        <div class="field-group">
+          <label for="signupExam">I am preparing for</label>
+          <select id="signupExam">
+            <option value="">Select your exam</option>
+            <option value="iba">IBA Karachi</option>
+            <option value="mdcat">MDCAT</option>
+            <option value="ecat">ECAT</option>
+            <option value="other">Other</option>
+          </select>
+          <span class="field-error" id="signupExamErr"></span>
+        </div>
+
+        <div id="signupAlert" class="form-alert" style="display:none"></div>
+
+        <button type="submit" class="btn-submit" id="signupSubmit">
+          <span class="btn-label">Create free account</span>
+          <span class="btn-spinner" style="display:none"></span>
+        </button>
+
+        <p class="terms-note">
+          By signing up you agree to our
+          <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+        </p>
+
+      </form>
+    </div>
+
+    <!-- ── FORGOT PASSWORD ────────────────────────── -->
+    <div class="form-panel" id="forgotPanel" style="display:none">
+
+      <button class="back-btn" onclick="switchTab('signin')">← Back to sign in</button>
+
+      <div class="form-header">
+        <h1>Reset password</h1>
+        <p>We'll send a reset link to your email.</p>
+      </div>
+
+      <form id="forgotForm" onsubmit="handleForgot(event)" novalidate>
+        <div class="field-group">
+          <label for="forgotEmail">Email address</label>
+          <input type="email" id="forgotEmail" placeholder="you@example.com"/>
+          <span class="field-error" id="forgotEmailErr"></span>
+        </div>
+        <div id="forgotAlert" class="form-alert" style="display:none"></div>
+        <button type="submit" class="btn-submit" id="forgotSubmit">
+          <span class="btn-label">Send reset link</span>
+          <span class="btn-spinner" style="display:none"></span>
+        </button>
+      </form>
+    </div>
+
+  </main>
+
+  <!-- Script -->
+  <script src="../supabase.js"></script>
+  <script type="module" src="auth.js"></script>
+
+</body>
+</html>

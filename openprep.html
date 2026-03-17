@@ -16,16 +16,18 @@
   <!-- ─── NAV ──────────────────────────────────────── -->
   <nav>
     <div class="brand-block">
-      <div class="logo">Open<span>Prep</span>.pk</div>
-      <div class="tagline">Every thing is free here</div>
+      <a href="#">
+        <div class="logo">Open<span>Prep</span>.pk</div>
+      </a>
+      <div class="tagline">Everything is free here</div>
     </div>
     <ul class="nav-links">
-      <li><a href="#">Exams</a></li>
+      <li><a href="#coverage">Exams</a></li>
       <li><a href="#">Practice</a></li>
       <li><a href="#">Contributors</a></li>
       <li><a href="#">About</a></li>
     </ul>
-    <a href="#" class="nav-cta">Start Free →</a>
+    <a href="/Signup/auth.html" class="nav-cta">Start Free →</a>
   </nav>
 
   <!-- ─── HERO ─────────────────────────────────────── -->
@@ -33,10 +35,10 @@
     <div class="hero-eyebrow">Free for every student in Pakistan</div>
     <h1>Your best shot at <em>the right university</em></h1>
     <p class="hero-sub">
-      Open source test prep for IBA Karachi currently, very soon LCAT , MDCAT, ECAT, and more will be available. Practice questions, mock tests, and flashcards — all aligned to your syllabus, all free forever.
+      Open source test prep for IBA Karachi currently, with LCAT, MDCAT, ECAT, and more coming soon. Practice questions, mock tests, and flashcards — all aligned to your syllabus, all free forever.
     </p>
     <div class="hero-actions">
-      <a href="#" class="btn-primary">Start Practicing</a>
+      <a href="#coverage" class="btn-primary">Start Practicing</a>
       <a href="#" class="btn-ghost">See how it works</a>
     </div>
   </section>
@@ -44,7 +46,7 @@
   <div class="divider"></div>
 
   <!-- ─── UNIVERSITY COVERAGE ──────────────────────── -->
-  <section class="coverage">
+  <section class="coverage" id="coverage">
     <div class="section-label">What we cover</div>
 
     <div class="tab-row">
@@ -54,18 +56,21 @@
       <div class="tab">Engineering</div>
     </div>
 
+    <a href="IBA-Karachi/subject.html" style="text-decoration: none;">
     <div class="exam-grid">
 
       <div class="exam-card">
         <div class="exam-tag">University</div>
+        <img class = "university-logo" src="logo_IBA_Karachi.png" alt="IBA Karachi Logo"/>
         <h3>IBA Karachi</h3>
+        
         <p>Full prep for IBA's aptitude test — quantitative, verbal, analytical, and essay sections.</p>
         <div class="exam-meta">
           <span><strong>1,200+</strong> questions</span>
           <span><strong>8</strong> mock tests</span>
         </div>
       </div>
-
+</a>
       <div class="exam-card">
         <div class="exam-tag">Medical</div>
         <h3>MDCAT</h3>
@@ -92,7 +97,7 @@
   <div class="divider"></div>
 
   <!-- ─── FLASHCARD DEMO ────────────────────────────── -->
-  <section class="demo-section">
+  <section class="demo-section ,  visible = disabled ;">
     <div class="demo-inner">
       <div class="demo-label">Test environment — live preview</div>
       <h2 class="demo-title">One question. Full focus.</h2>
@@ -110,14 +115,14 @@
             </div>
             <div class="card-bottom">
               <span class="card-subject" id="qSubject"></span>
-              <span class="flip-hint" onclick="flipCard()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button type="button" class="flip-hint" onclick="flipCard()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
                   <path d="M4 12v-1a8 8 0 0 1 8-8 8 8 0 0 1 5.657 2.343M20 12v1a8 8 0 0 1-8 8 8 8 0 0 1-5.657-2.343"/>
                   <polyline points="20 5 20 12 13 12"/>
                   <polyline points="4 19 4 12 11 12"/>
                 </svg>
                 Reveal answer
-              </span>
+              </button>
             </div>
           </div>
 
@@ -129,14 +134,14 @@
             </div>
             <div class="card-bottom">
               <span class="card-subject" id="aSubject"></span>
-              <span class="flip-hint" onclick="flipCard()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <button type="button" class="flip-hint" onclick="flipCard()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false">
                   <path d="M4 12v-1a8 8 0 0 1 8-8 8 8 0 0 1 5.657 2.343M20 12v1a8 8 0 0 1-8 8 8 8 0 0 1-5.657-2.343"/>
                   <polyline points="20 5 20 12 13 12"/>
                   <polyline points="4 19 4 12 11 12"/>
                 </svg>
                 Back to question
-              </span>
+              </button>
             </div>
           </div>
 
@@ -148,13 +153,14 @@
         <button class="fc-btn" id="prevBtn" onclick="prevCard()" disabled>← Prev</button>
         <span class="fc-count" id="fcCount">1 / 5</span>
         <div class="fc-progress">
-          <div class="fc-progress-fill" id="fcBar" style="width:20%"></div>
+          <div class="fc-progress-fill" id="fcBar"></div>
         </div>
         <button class="fc-btn" id="nextBtn" onclick="nextCard()">Next →</button>
       </div>
 
     </div>
   </section>
+
 
   <!-- ─── OPEN SOURCE ───────────────────────────────── -->
   <section class="oss-wrapper">
@@ -187,7 +193,7 @@
   <!-- ─── FOOTER ────────────────────────────────────── -->
   <footer>
     <p>OpenPrep.pk — free forever, open source always</p>
-    <p>Made with care at IBA Karachi</p>
+    <p>Made with care by Mehdi Ali Qoli at IBA Karachi</p>
   </footer>
 
   <!-- Your script -->
