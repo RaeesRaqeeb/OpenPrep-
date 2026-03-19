@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — OpenPrep</title>
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+  <!-- Fonts — same as main site -->
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ── RESET & BASE ────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #0f0f0f;
+      --ink:     #1a1a1a;
+      --mid:     #555;
+      --muted:   #999;
+      --border:  #e8e8e8;
+      --surface: #fafafa;
+      --white:   #ffffff;
+      --blue:    #2563eb;
+      --green:   #16a34a;
+      --red:     #dc2626;
+      --amber:   #d97706;
+
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-sans:  'DM Sans', sans-serif;
+    }
+
+    html, body {
+      font-family: var(--font-sans);
+      background: var(--white);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── NAV ─────────────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,0.92);
+      /* backdrop-filter: blur(10px); */
+      z-index: 100;
+    }
+
+    .nav-logo {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      color: var(--black);
+      text-decoration: none;
+    }
+
+    .nav-logo span { font-style: italic; }
+
+    .nav-back {
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.15s;
+    }
+
+    .nav-back:hover { color: var(--ink); }
+
+    /* ── PAGE LAYOUT ─────────────────────────────── */
+    .page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* ── LOADING / ERROR STATE ───────────────────── */
+    .page-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 40vh;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--black);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── PROFILE HEADER ──────────────────────────── */
+    .profile-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .profile-avatar-lg {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: var(--black);
+      color: var(--white);
+      font-family: var(--font-sans);
+      font-size: 24px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      border: 3px solid var(--border);
+    }
+
+    .profile-avatar-lg img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .profile-header-info {
+      flex: 1;
+    }
+
+    .profile-name {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: var(--black);
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .profile-email {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .profile-joined {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── SECTION LABEL ───────────────────────────── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    /* ── STATS ROW ───────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.4s 0.1s ease both;
+    }
+
+    .stat-box {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      background: var(--white);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .stat-box:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+      transform: translateY(-2px);
+    }
+
+    .stat-box-value {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .stat-box-value.blue  { color: var(--blue); }
+    .stat-box-value.green { color: var(--green); }
+    .stat-box-value.red   { color: var(--red); }
+
+    .stat-box-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── ACCURACY BAR ────────────────────────────── */
+    .accuracy-wrap {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 40px;
+      animation: fadeUp 0.4s 0.15s ease both;
+    }
+
+    .accuracy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 14px;
+    }
+
+    .accuracy-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink);
+    }
+
+    .accuracy-pct {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      color: var(--black);
+    }
+
+    .bar-track {
+      height: 8px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      background: var(--green);
+      transition: width 1s cubic-bezier(.4,0,.2,1);
+      width: 0%;
+    }
+
+    .bar-fill.low    { background: var(--red); }
+    .bar-fill.medium { background: var(--amber); }
+    .bar-fill.high   { background: var(--green); }
+
+    /* ── SIGN OUT ────────────────────────────────── */
+    .signout-wrap {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      animation: fadeUp 0.4s 0.25s ease both;
+    }
+
+    .signout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--red);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .signout-btn:hover {
+      background: #fef2f2;
+      border-color: #fca5a5;
+    }
+
+    /* ── ANIMATION ───────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 520px) {
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .profile-name { font-size: 22px; }
+      nav { padding: 0 16px; }
+      .page { padding: 32px 16px 60px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── NAV ──────────────────────────────────── -->
+  <nav>
+    <a href="/index.html" class="nav-logo">Open<span>Prep</span></a>
+    <a href="/index.html" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to home
+    </a>
+  </nav>
+
+  <!-- ─── PAGE ──────────────────────────────────── -->
+  <div class="page">
+
+    <!-- Loading state -->
+    <div class="page-loading" id="loadingState">
+      <div class="spinner"></div>
+      <span>Loading your profile…</span>
+    </div>
+
+    <!-- Profile content (hidden until loaded) -->
+    <div id="profileContent" style="display:none;">
+
+      <!-- Header -->
+      <div class="profile-header">
+        <div class="profile-avatar-lg" id="avatarLg"></div>
+        <div class="profile-header-info">
+          <div class="profile-name" id="profileName">—</div>
+          <div class="profile-email" id="profileEmail">—</div>
+          <div class="profile-joined" id="profileJoined"></div>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="section-label">Overall stats</div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-box-value blue" id="totalAttempted">0</div>
+          <div class="stat-box-label">Attempted</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-value green" id="totalCorrect">0</div>
+          <div class="stat-box-label">Correct</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-box-value red" id="totalWrong">0</div>
+          <div class="stat-box-label">Wrong</div>
+        </div>
+      </div>
+
+      <!-- Accuracy bar -->
+      <div class="accuracy-wrap">
+        <div class="accuracy-header">
+          <span class="accuracy-title">Overall accuracy</span>
+          <span class="accuracy-pct" id="accuracyPct">—</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="accuracyBar"></div>
+        </div>
+      </div>
+
+      <!-- Sign out -->
+      <div class="signout-wrap">
+        <button class="signout-btn" id="signoutBtn">Sign out</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="/supabase.js"></script>
+  <script>
+    ;(async function () {
+
+      /* ── Init client ─────────────────────────── */
+      const supabaseClient = window.__openprepSupabaseClient || (() => {
+        const c = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY)
+        window.__openprepSupabaseClient = c
+        return c
+      })()
+
+      /* ── Guard: redirect if not logged in ─────── */
+      const { data: { session } } = await supabaseClient.auth.getSession()
+      if (!session) {
+        window.location.href = '/Signup/auth.html'
+        return
+      }
+
+      const user = session.user
+
+      /* ── Fill profile header ─────────────────── */
+      const name     = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Student'
+      const email    = user.email || ''
+      const photoUrl = user.user_metadata?.avatar_url || ''
+      const joined   = new Date(user.created_at).toLocaleDateString('en-PK', { year: 'numeric', month: 'long' })
+
+      document.getElementById('profileName').textContent  = name
+      document.getElementById('profileEmail').textContent = email
+      document.getElementById('profileJoined').textContent = `Member since ${joined}`
+
+      // Avatar
+      const avatarEl = document.getElementById('avatarLg')
+      if (photoUrl) {
+        avatarEl.innerHTML = `<img src="${photoUrl}" alt="${name}" referrerpolicy="no-referrer" />`
+      } else {
+        const initials = name.split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase()
+        avatarEl.textContent   = initials
+        avatarEl.style.background = hashColor(email)
+      }
+
+      function getLocalStatsStoreKey(userId) {
+        return `openprep_user_stats_v1_${userId}`
+      }
+
+      function readLocalStats(userId) {
+        try {
+          const raw = localStorage.getItem(getLocalStatsStoreKey(userId))
+          return raw ? JSON.parse(raw) : {}
+        } catch (_) {
+          return {}
+        }
+      }
+
+      async function fetchAggregatedStats(userId) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('user_stats')
+            .select('attempted, correct, wrong')
+            .eq('user_id', userId)
+
+          if (!error && data && data.length > 0) {
+            return {
+              attempted: data.reduce((s, r) => s + (r.attempted || 0), 0),
+              correct: data.reduce((s, r) => s + (r.correct || 0), 0),
+              wrong: data.reduce((s, r) => s + (r.wrong || 0), 0)
+            }
+          }
+        } catch (_) {}
+
+        const localMap = readLocalStats(userId)
+        const rows = Object.values(localMap)
+        return {
+          attempted: rows.reduce((s, r) => s + (r.attempted || 0), 0),
+          correct: rows.reduce((s, r) => s + (r.correct || 0), 0),
+          wrong: rows.reduce((s, r) => s + (r.wrong || 0), 0)
+        }
+      }
+
+      /* ── Fetch stats (same source logic as homepage) ───────── */
+      const aggregated = await fetchAggregatedStats(user.id)
+      const totalAttempted = aggregated.attempted
+      const totalCorrect   = aggregated.correct
+      const totalWrong     = aggregated.wrong
+      const denominator    = totalCorrect + totalWrong
+      const accuracy       = denominator > 0
+        ? Math.round((totalCorrect / denominator) * 100)
+        : 0
+
+      document.getElementById('totalAttempted').textContent = totalAttempted
+      document.getElementById('totalCorrect').textContent   = totalCorrect
+      document.getElementById('totalWrong').textContent     = totalWrong
+      document.getElementById('accuracyPct').textContent    = accuracy + '%'
+
+      // Accuracy bar
+      const bar = document.getElementById('accuracyBar')
+      bar.classList.add(accuracy >= 70 ? 'high' : accuracy >= 40 ? 'medium' : 'low')
+      setTimeout(() => { bar.style.width = accuracy + '%' }, 100)
+
+      /* ── Sign out ────────────────────────────── */
+      document.getElementById('signoutBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('signoutBtn')
+        btn.textContent = 'Signing out…'
+        btn.disabled    = true
+        await supabaseClient.auth.signOut()
+        window.location.href = '/Signup/auth.html'
+      })
+
+      /* ── Show page ───────────────────────────── */
+      document.getElementById('loadingState').style.display  = 'none'
+      document.getElementById('profileContent').style.display = ''
+
+      /* ── Helper ──────────────────────────────── */
+      function hashColor(str) {
+        const colors = ['#2563eb','#7c3aed','#0891b2','#059669','#d97706','#dc2626','#db2777','#4f46e5']
+        let hash = 0
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash)
+        return colors[Math.abs(hash) % colors.length]
+      }
+
+    })()
+  </script>
+
+</body>
+</html>

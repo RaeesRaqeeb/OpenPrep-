@@ -40,7 +40,7 @@
   overflow: hidden;
   border: 2px solid #e5e5e5;
   transition: border-color 0.2s;
-  user-select: none;
+  /* user-select: none; */
   flex-shrink: 0;
 }
 

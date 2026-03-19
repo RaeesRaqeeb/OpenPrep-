@@ -119,13 +119,25 @@
   }
 
   /* ── 7. LOGOUT ───────────────────────────────── */
-  const logoutBtn = document.getElementById('logoutBtn')
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', async () => {
-      await supabaseClient.auth.signOut()
-      window.location.reload()
-    })
-  }
+//   const logoutBtn = document.getElementById('logoutBtn')
+//   if (logoutBtn) {
+//     logoutBtn.addEventListener('click', async () => {
+//       await supabaseClient.auth.signOut()
+//       window.location.reload()
+//     })
+//   }
+
+
+  // ✅ Fixed — waits for DOM, redirects to login instead of reload
+const logoutBtn = document.getElementById('logoutBtn')
+if (logoutBtn) {
+  logoutBtn.addEventListener('click', async () => {
+    logoutBtn.textContent = 'Signing out...'
+    logoutBtn.disabled = true
+    await supabaseClient.auth.signOut()
+    window.location.href = '/Signup/auth.html'
+  })
+}
 
   /* ── 8. FETCH & SHOW STATS ───────────────────── */
   const statsSection = document.getElementById('statsSection')
