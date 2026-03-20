@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Privacy Policy — OpenPrep</title>
+    <title>Terms of Service — OpenPrep</title>
     <meta
       name="description"
-      content="Privacy Policy for OpenPrep — free exam prep for Pakistani students."
+      content="Terms of Service for OpenPrep — free exam prep for Pakistani students."
     />
 
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
@@ -58,25 +58,18 @@
         position: sticky;
         top: 0;
         background: rgba(255, 255, 255, 0.94);
-        /* backdrop-filter: blur(12px); z-index: 100; */
+        /* backdrop-filter: blur(12px); */
+        z-index: 100;
       }
-      .nav-logo {
+      .logo {
         font-family: var(--serif);
         font-size: 20px;
-        color: var(--black);
+        color: var(--ink);
         text-decoration: none;
+        letter-spacing: -0.3px;
       }
-      .nav-logo span {
-        font-style: italic;
-      }
-      .nav-back {
-        font-size: 13px;
-        color: var(--muted);
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        transition: color 0.15s;
+      .logo span {
+        color: var(--accent);
       }
       .nav-back:hover {
         color: var(--ink);
@@ -160,6 +153,7 @@
         list-style: none;
         margin-top: 8px;
       }
+
       .doc-section ul li {
         font-size: 14px;
         color: var(--mid);
@@ -169,9 +163,11 @@
         border-bottom: 1px solid var(--border);
         position: relative;
       }
+
       .doc-section ul li:last-child {
         border-bottom: none;
       }
+
       .doc-section ul li::before {
         content: "–";
         position: absolute;
@@ -183,41 +179,6 @@
         height: 1px;
         background: var(--border);
         margin: 36px 0;
-      }
-
-      /* ── SUMMARY TABLE ───────────────────────────── */
-      .summary-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 16px 0;
-        font-size: 13px;
-      }
-      .summary-table th {
-        text-align: left;
-        font-size: 11px;
-        font-weight: 600;
-        letter-spacing: 0.07em;
-        text-transform: uppercase;
-        color: var(--muted);
-        padding: 8px 12px;
-        border-bottom: 1px solid var(--border);
-        background: var(--surface);
-      }
-      .summary-table td {
-        padding: 10px 12px;
-        border-bottom: 1px solid var(--border);
-        color: var(--mid);
-        font-weight: 300;
-        line-height: 1.6;
-        vertical-align: top;
-      }
-      .summary-table tr:last-child td {
-        border-bottom: none;
-      }
-      .summary-table td:first-child {
-        font-weight: 500;
-        color: var(--ink);
-        width: 35%;
       }
 
       /* ── HIGHLIGHT ───────────────────────────────── */
@@ -244,9 +205,6 @@
         color: var(--mid);
         line-height: 1.7;
         margin-bottom: 8px;
-      }
-      .contact-block p:last-child {
-        margin-bottom: 0;
       }
       .contact-block a {
         color: var(--black);
@@ -277,20 +235,7 @@
         .doc-header h1 {
           font-size: 30px;
         }
-        .summary-table td:first-child {
-          width: 40%;
-        }
       }
-
-      .logo {
-  font-family: var(--serif);
-  font-size: 20px;
-  color: var(--ink);
-  text-decoration: none;
-  letter-spacing: -0.3px;
-}
-.logo span { color: var(--accent); }
-
     </style>
   </head>
   <body>
@@ -314,25 +259,27 @@
     <div class="page">
       <div class="doc-header">
         <div class="doc-eyebrow">Legal</div>
-        <h1>Privacy Policy</h1>
+        <h1>Terms of Service</h1>
         <div class="doc-meta">
           Last updated: March 2025 &nbsp;·&nbsp; OpenPrep (openprep.me)
         </div>
       </div>
 
       <div class="highlight">
-        We keep this simple. OpenPrep collects as little data as possible, never
-        sells it, and only uses it to make the platform work for you.
+        OpenPrep is a free, open-source platform. These terms are
+        straightforward and written in plain language — no legal tricks, no
+        hidden conditions.
       </div>
 
       <!-- 1 -->
       <div class="doc-section">
-        <h2><span class="section-num">1</span> Who we are</h2>
+        <h2><span class="section-num">1</span> What is OpenPrep</h2>
         <p>
           OpenPrep is a free, open-source exam preparation platform built by
-          Pakistani university students and available at openprep.me. This
-          privacy policy explains what data we collect when you use OpenPrep and
-          how we use it.
+          Pakistani university students for students preparing for admission
+          tests at IBA Karachi, MDCAT, ECAT, LUMS, FAST, NUST, NED and other
+          universities. The platform provides practice MCQs, mock tests, and
+          progress tracking at no cost.
         </p>
       </div>
 
@@ -340,51 +287,12 @@
 
       <!-- 2 -->
       <div class="doc-section">
-        <h2><span class="section-num">2</span> What data we collect</h2>
-        <p>Here is a plain summary of everything OpenPrep collects:</p>
-
-        <table class="summary-table">
-          <thead>
-            <tr>
-              <th>Data</th>
-              <th>Why we collect it</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Your name</td>
-              <td>
-                To display on your profile and personalize your experience.
-              </td>
-            </tr>
-            <tr>
-              <td>Your email address</td>
-              <td>To create and identify your account.</td>
-            </tr>
-            <tr>
-              <td>Profile photo</td>
-              <td>
-                Only if you sign in with Google and have one. Shown on your
-                profile avatar.
-              </td>
-            </tr>
-            <tr>
-              <td>Quiz results</td>
-              <td>
-                To track your progress and show you how you are performing over
-                time.
-              </td>
-            </tr>
-            <tr>
-              <td>Papers attempted</td>
-              <td>To show your history and calculate your overall accuracy.</td>
-            </tr>
-          </tbody>
-        </table>
-
+        <h2><span class="section-num">2</span> Acceptance of terms</h2>
         <p>
-          We do not collect your phone number, location, payment details, or any
-          other personal information.
+          By accessing or using OpenPrep at openprep.me you agree to these Terms
+          of Service. If you do not agree, please do not use the platform. These
+          terms apply to all users including students, contributors, and
+          visitors.
         </p>
       </div>
 
@@ -392,21 +300,21 @@
 
       <!-- 3 -->
       <div class="doc-section">
-        <h2><span class="section-num">3</span> How we collect data</h2>
+        <h2><span class="section-num">3</span> Your account</h2>
+        <p>When you create an account on OpenPrep:</p>
         <ul>
+          <li>You must provide accurate information during signup.</li>
+          <li>You are responsible for keeping your account secure.</li>
           <li>
-            <strong>Google Sign-In</strong> — if you sign in with Google, we
-            receive your name, email, and profile photo from Google. We only
-            request basic profile permissions.
+            You must not share your account with others or create accounts on
+            behalf of others.
           </li>
           <li>
-            <strong>Email signup</strong> — if you sign up with email, we
-            collect the email address and name you provide.
+            You must be a student or someone with a genuine interest in the
+            platform's purpose.
           </li>
           <li>
-            <strong>Quiz activity</strong> — when you submit a quiz, we save
-            your score, correct answers, and wrong answers linked to your
-            account.
+            We reserve the right to suspend accounts that violate these terms.
           </li>
         </ul>
       </div>
@@ -415,22 +323,12 @@
 
       <!-- 4 -->
       <div class="doc-section">
-        <h2><span class="section-num">4</span> How we use your data</h2>
-        <p>We use your data only to:</p>
-        <ul>
-          <li>Create and manage your account.</li>
-          <li>
-            Show your quiz progress and performance on your profile dashboard.
-          </li>
-          <li>Display your name and avatar in the interface.</li>
-          <li>
-            Send account-related emails such as email confirmation or password
-            reset.
-          </li>
-        </ul>
+        <h2><span class="section-num">4</span> Free to use — always</h2>
         <p>
-          We do not use your data for advertising, profiling, or any commercial
-          purpose.
+          OpenPrep is and will always be free for students. We do not charge for
+          access to any content, mock tests, or features on the platform.
+          Optional financial support towards hosting costs is entirely voluntary
+          and comes with no additional benefits or obligations.
         </p>
       </div>
 
@@ -438,80 +336,67 @@
 
       <!-- 5 -->
       <div class="doc-section">
-        <h2><span class="section-num">5</span> Who we share data with</h2>
+        <h2><span class="section-num">5</span> Content and contributions</h2>
         <p>
-          We do not sell or share your personal data with third parties. Your
-          data passes through the following services only to make OpenPrep work:
+          OpenPrep is open source. Contributors may add questions, explanations,
+          code, and other material to the platform. By contributing you agree
+          that:
         </p>
         <ul>
           <li>
-            <strong>Supabase</strong> — our database and authentication
-            provider. Your account and quiz data is stored securely on Supabase
-            servers.
-            <a
-              href="https://supabase.com/privacy"
-              target="_blank"
-              style="color: var(--black)"
-              >Supabase Privacy Policy</a
-            >.
+            Your contributions are your own original work or properly sourced.
           </li>
           <li>
-            <strong>Netlify</strong> — our website hosting provider. They serve
-            the OpenPrep website but do not access your account data.
-            <a
-              href="https://www.netlify.com/privacy/"
-              target="_blank"
-              style="color: var(--black)"
-              >Netlify Privacy Policy</a
-            >.
+            You are not submitting copyrighted material without permission.
           </li>
           <li>
-            <strong>Google</strong> — only if you choose to sign in with Google.
-            <a
-              href="https://policies.google.com/privacy"
-              target="_blank"
-              style="color: var(--black)"
-              >Google Privacy Policy</a
-            >.
+            Your contributions may be edited, removed, or improved by other
+            contributors.
+          </li>
+          <li>
+            All contributions are made freely under the project's open-source
+            license.
           </li>
         </ul>
+        <p>
+          OpenPrep reserves the right to remove any content that is inaccurate,
+          harmful, offensive, or violates these terms.
+        </p>
       </div>
 
       <div class="divider"></div>
 
       <!-- 6 -->
       <div class="doc-section">
-        <h2><span class="section-num">6</span> Data storage and security</h2>
-        <p>
-          Your data is stored securely using Supabase with row-level security
-          enabled — meaning your quiz data is only accessible by you and cannot
-          be read by other users. We use HTTPS across the entire platform to
-          protect data in transit.
-        </p>
-        <p>
-          While we take reasonable steps to protect your data, no system is
-          completely secure. Please use a strong password and do not share your
-          account credentials.
-        </p>
+        <h2><span class="section-num">6</span> Acceptable use</h2>
+        <p>You agree not to use OpenPrep to:</p>
+        <ul>
+          <li>
+            Scrape, copy, or redistribute content in bulk without permission.
+          </li>
+          <li>
+            Attempt to gain unauthorized access to any part of the platform.
+          </li>
+          <li>Submit false, misleading, or harmful content.</li>
+          <li>
+            Use the platform for any commercial purpose without prior written
+            consent.
+          </li>
+          <li>Harass, impersonate, or harm other users.</li>
+        </ul>
       </div>
 
       <div class="divider"></div>
 
       <!-- 7 -->
       <div class="doc-section">
-        <h2><span class="section-num">7</span> Your rights</h2>
-        <p>You have the right to:</p>
-        <ul>
-          <li>Access the personal data we hold about you.</li>
-          <li>Request correction of any inaccurate data.</li>
-          <li>Request deletion of your account and all associated data.</li>
-          <li>
-            Stop using OpenPrep at any time — your data is not held hostage.
-          </li>
-        </ul>
+        <h2><span class="section-num">7</span> Accuracy of content</h2>
         <p>
-          To exercise any of these rights, contact us via GitHub or the email
-          listed at the bottom of this page.
+          All preparation material on OpenPrep is contributed and reviewed by
+          students. While we make every effort to ensure accuracy, we cannot
+          guarantee that every question, answer, or explanation is free of
+          errors. OpenPrep is a study aid — always cross-reference with official
+          syllabus material from your target university.
         </p>
       </div>
 
@@ -519,11 +404,14 @@
 
       <!-- 8 -->
       <div class="doc-section">
-        <h2><span class="section-num">8</span> Cookies</h2>
+        <h2><span class="section-num">8</span> Privacy</h2>
         <p>
-          OpenPrep uses only the cookies necessary to keep you logged in
-          (session cookies from Supabase Auth). We do not use tracking cookies,
-          advertising cookies, or any third-party analytics cookies.
+          We collect only your name and email address for login purposes and
+          your quiz results for progress tracking. We do not sell, share, or
+          misuse your personal data. For full details see our
+          <a href="/privacy.html" style="color: var(--black); font-weight: 500"
+            >Privacy Policy</a
+          >.
         </p>
       </div>
 
@@ -531,12 +419,12 @@
 
       <!-- 9 -->
       <div class="doc-section">
-        <h2><span class="section-num">9</span> Children's privacy</h2>
+        <h2><span class="section-num">9</span> Limitation of liability</h2>
         <p>
-          OpenPrep is intended for students aged 16 and above. We do not
-          knowingly collect data from children under 13. If you believe a child
-          under 13 has created an account, please contact us and we will delete
-          it promptly.
+          OpenPrep is provided as-is with no warranties of any kind. We are not
+          responsible for any exam outcomes, admission decisions, or
+          consequences resulting from use of this platform. We do our best to
+          keep the platform available but cannot guarantee uninterrupted access.
         </p>
       </div>
 
@@ -544,11 +432,23 @@
 
       <!-- 10 -->
       <div class="doc-section">
-        <h2><span class="section-num">10</span> Changes to this policy</h2>
+        <h2><span class="section-num">10</span> Changes to these terms</h2>
         <p>
-          If we make any significant changes to this privacy policy we will
-          update the date at the top of this page. Continued use of OpenPrep
-          after changes means you accept the updated policy.
+          We may update these terms as the platform grows. If we make
+          significant changes we will note the updated date at the top of this
+          page. Continued use of OpenPrep after changes means you accept the
+          updated terms.
+        </p>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- 11 -->
+      <div class="doc-section">
+        <h2><span class="section-num">11</span> Governing law</h2>
+        <p>
+          These terms are governed by the laws of Pakistan. Any disputes arising
+          from use of OpenPrep will be handled under Pakistani jurisdiction.
         </p>
       </div>
 
@@ -556,16 +456,16 @@
       <div class="contact-block">
         <p>
           <strong style="color: var(--black)"
-            >Questions or data requests?</strong
+            >Questions about these terms?</strong
           >
         </p>
         <p>
-          Contact us via GitHub at
+          Reach out via GitHub at
           <a href="https://github.com/MehdiAliQoli/OpenPrep" target="_blank"
             >github.com/MehdiAliQoli/OpenPrep</a
-          >.
+          >
+          or through the contact details on our about page.
         </p>
-        <p>This platform is maintained by Mehdi Ali Qoli, IBA Karachi.</p>
       </div>
     </div>
 
@@ -573,7 +473,7 @@
       <p>OpenPrep — free forever, open source always</p>
       <p>
         <a href="/Aboutus/Aboutus.html">About</a> &nbsp;·&nbsp;
-        <a href="/termofservice.html">Terms of Service</a> &nbsp;·&nbsp;
+        <a href="/privacy.html">Privacy Policy</a> &nbsp;·&nbsp;
         <a href="/Contributor/contributors.html">Contributors</a>
       </p>
     </footer>
