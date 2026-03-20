@@ -42,6 +42,12 @@
   const name      = user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'
   const email     = user.email || ''
   const photoUrl  = user.user_metadata?.avatar_url || ''
+  const STATS_TARGETS = [
+    { table: 'User_States', quizColumn: 'quiz_id' },
+    { table: 'user_states', quizColumn: 'quiz_id' },
+    { table: 'user_stats',  quizColumn: 'paper_id' },
+    { table: 'user_stats',  quizColumn: 'quiz_id' },
+  ]
 
   function getLocalStatsStoreKey(userId) {
     return `openprep_user_stats_v1_${userId}`
@@ -69,6 +75,31 @@
     const totalCorrect   = rows.reduce((s, r) => s + (r.correct || 0), 0)
     const totalWrong     = rows.reduce((s, r) => s + (r.wrong || 0), 0)
     setStatValues(totalAttempted, totalCorrect, totalWrong)
+  }
+
+  async function fetchServerStats(userId) {
+    let lastError = null
+
+    for (const target of STATS_TARGETS) {
+      const { data, error } = await supabaseClient
+        .from(target.table)
+        .select(`attempted, correct, wrong, ${target.quizColumn}`)
+        .eq('user_id', userId)
+
+      if (error) {
+        lastError = error
+        continue
+      }
+
+      if (data && data.length > 0) {
+        return data
+      }
+    }
+
+    if (lastError) {
+      console.warn('Could not fetch server stats:', lastError.message || lastError)
+    }
+    return []
   }
 
   /* ── 4. FILL AVATAR ──────────────────────────── */
@@ -145,12 +176,9 @@ if (logoutBtn) {
     statsSection.style.display = ''
 
     try {
-      const { data, error } = await supabaseClient
-        .from('user_stats')
-        .select('attempted, correct, wrong')
-        .eq('user_id', user.id)
+      const data = await fetchServerStats(user.id)
 
-      if (!error && data && data.length > 0) {
+      if (data && data.length > 0) {
         const totalAttempted = data.reduce((s, r) => s + (r.attempted || 0), 0)
         const totalCorrect   = data.reduce((s, r) => s + (r.correct   || 0), 0)
         const totalWrong     = data.reduce((s, r) => s + (r.wrong     || 0), 0)

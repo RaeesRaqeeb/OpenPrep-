@@ -39,6 +39,13 @@ let paperData        = null
 let reviewMode       = false
 let hasSubmitted     = false
 let submitInProgress = false
+const STATS_TARGETS  = [
+  { table: 'User_States', quizColumn: 'quiz_id' },
+  { table: 'User_States', quizColumn: 'quiz_id' },
+  { table: 'User_Stats',  quizColumn: 'paper_id' },
+  { table: 'User_Stats',  quizColumn: 'quiz_id' },
+]
+let lastServerSyncError = ''
 
 function ensureToastStyles() {
   if (document.getElementById('saveToastStyles')) return
@@ -421,6 +428,73 @@ function writeLocalStats(userId, map) {
   }
 }
 
+function normalizeSupabaseError(error) {
+  if (!error) return 'Unknown server error'
+  if (typeof error === 'string') return error
+  return error.message || error.details || error.hint || JSON.stringify(error)
+}
+
+async function saveStatsToTarget(target, userId, paperId, result) {
+  const { data: existing, error: selectError } = await supabaseClient
+    .from(target.table)
+    .select('id, correct')
+    .eq('user_id', userId)
+    .eq(target.quizColumn, paperId)
+    .order('correct', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (selectError) {
+    return {
+      ok: false,
+      error: `[${target.table}.${target.quizColumn}] ${normalizeSupabaseError(selectError)}`
+    }
+  }
+
+  if (existing) {
+    if (result.correct <= (existing.correct || 0)) {
+      return { ok: true }
+    }
+
+    const { error: updateError } = await supabaseClient
+      .from(target.table)
+      .update({
+        attempted: result.attempted,
+        correct:   result.correct,
+        wrong:     result.wrong,
+      })
+      .eq('id', existing.id)
+
+    if (updateError) {
+      return {
+        ok: false,
+        error: `[${target.table}.${target.quizColumn}] ${normalizeSupabaseError(updateError)}`
+      }
+    }
+
+    return { ok: true }
+  }
+
+  const { error: insertError } = await supabaseClient
+    .from(target.table)
+    .insert([{
+      user_id:   userId,
+      [target.quizColumn]: paperId,
+      attempted: result.attempted,
+      correct:   result.correct,
+      wrong:     result.wrong,
+    }])
+
+  if (insertError) {
+    return {
+      ok: false,
+      error: `[${target.table}.${target.quizColumn}] ${normalizeSupabaseError(insertError)}`
+    }
+  }
+
+  return { ok: true }
+}
+
 /* ── SAVE STATS — UPSERT PER PAPER ──────────────────────────── */
 /*
   Logic:
@@ -430,77 +504,59 @@ function writeLocalStats(userId, map) {
   - Total attempted = sum of questions across best attempts (not doubled)
 */
 async function persistUserStats(result) {
+  lastServerSyncError = ''
+  window.__openprepLastStatsSyncError = ''
+
   const { data: { session } } = await supabaseClient.auth.getSession()
   const userId = session?.user?.id
   if (!userId) return false
 
   const paperId = getPaperId()
-
   if (!paperId) return false
 
-  // Local fallback keeps progress visible on homepage even if DB relation/policies are misconfigured.
-  const localStats = readLocalStats(userId)
-  const existingLocal = localStats[paperId]
-  if (!existingLocal || result.correct > (existingLocal.correct || 0)) {
-    localStats[paperId] = {
-      attempted: result.attempted,
-      correct: result.correct,
-      wrong: result.wrong
-    }
-    writeLocalStats(userId, localStats)
-  }
-
   try {
-    // 1. Check if a previous best attempt exists for this paper
-    const { data: existing, error: selectError } = await supabaseClient
+    // First check if existing row has a better score — don't overwrite it
+    const { data: existing } = await supabaseClient
       .from('user_stats')
-      .select('id, correct')
+      .select('correct')
       .eq('user_id', userId)
       .eq('paper_id', paperId)
       .maybeSingle()
 
-    if (selectError) {
-      console.warn('Could not read user_stats:', selectError.message)
-      return true
+    // Only save if no previous attempt OR new score is better
+    if (existing && result.correct <= existing.correct) {
+      return true // previous was better, do nothing
     }
 
-    if (existing) {
-      // Row exists — only update if new attempt has MORE correct answers
-      if (result.correct > existing.correct) {
-        const { error } = await supabaseClient
-          .from('user_stats')
-          .update({
-            attempted: result.attempted,
-            correct:   result.correct,
-            wrong:     result.wrong,
-          })
-          .eq('id', existing.id)
+    // Upsert — inserts if no row exists, updates if it does
+    // onConflict targets the unique constraint (user_id + paper_id)
+    const { error } = await supabaseClient
+      .from('user_stats')
+      .upsert({
+        user_id:   userId,
+        paper_id:  paperId,
+        attempted: result.attempted,
+        correct:   result.correct,
+        wrong:     result.wrong,
+      }, {
+        onConflict: 'user_id, paper_id'  // uses unique constraint
+      })
 
-        if (error) console.warn('Could not update user_stats:', error.message)
-      }
-      // If not better, do nothing — keep the previous best
-      return true
-    } else {
-      // No previous attempt — insert fresh row
-      const { error } = await supabaseClient
-        .from('user_stats')
-        .insert([{
-          user_id:   userId,
-          paper_id:  paperId,
-          attempted: result.attempted,
-          correct:   result.correct,
-          wrong:     result.wrong,
-        }])
-
-      if (error) console.warn('Could not insert user_stats:', error.message)
-      return true
+    if (error) {
+      lastServerSyncError = error.message
+      window.__openprepLastStatsSyncError = error.message
+      console.warn('Upsert failed:', error.message)
+      return false
     }
-  } catch (err) {
-    console.warn('persistUserStats failed:', err.message)
+
     return true
-  }
 
-  return true
+  } catch (err) {
+    lastServerSyncError = err.message
+    window.__openprepLastStatsSyncError = err.message
+    console.warn('persistUserStats failed:', err.message)
+    return false
+  }
 }
 
 function showResultModal(result) {
@@ -524,7 +580,9 @@ async function submitTest() {
   const statsSaved = await persistUserStats(result)
   showResultModal(result)
   showSaveToast(
-    statsSaved ? 'Result saved to your profile.' : 'Result shown, but stats could not be saved.',
+    statsSaved
+      ? 'Result saved to server profile.'
+      : `Result saved only on this device. ${lastServerSyncError || 'Server sync failed.'}`,
     statsSaved ? 'success' : 'error'
   )
   hasSubmitted     = true
