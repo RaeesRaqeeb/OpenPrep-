@@ -666,8 +666,20 @@ footer p{ font-size:12px; color:var(--muted); }
 
 /* ─── RESPONSIVE ──────────────────────────────────── */
 @media(max-width:768px){
-  nav{ padding:16px 24px; }
-  .nav-links{ display:none; }
+  nav{
+    padding:16px 24px;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .nav-links{
+    display:flex;
+    order:3;
+    width:100%;
+    gap:16px;
+    padding-top:8px;
+    border-top:1px solid var(--border);
+    flex-wrap:wrap;
+  }
   .hero{
     min-height:calc(100svh - 64px);
     padding:60px 24px 48px;
