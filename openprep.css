@@ -427,6 +427,7 @@ h1 em{
   color: var(--ink);
 }
 
+
 .exam-tag{
   display:inline-block;
   font-size:11px;
@@ -439,6 +440,7 @@ h1 em{
   border-radius:4px;
   margin-bottom:16px;
 }
+
 .exam-meta span{ font-size:12px; color:var(--muted); }
 .exam-meta strong{ color:var(--ink); font-weight:500; }
 

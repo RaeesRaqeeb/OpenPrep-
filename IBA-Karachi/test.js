@@ -34,10 +34,18 @@ let answers      = {}
 let currentIndex = 0
 let timerInterval
 let secondsLeft  = 7200    // fixed 2 hours (no duration col in DB)
+let timerDeadlineMs = 0
 let paperData    = null
 let reviewMode   = false
 let hasSubmitted = false
 let submitInProgress = false
+let timerVisibilityBound = false
+let reportInProgress = false
+const REPORT_REASONS = [
+  'Problem with question',
+  'Problem with options or answer',
+  'Wrong or incorrect explanation'
+]
 
 function ensureToastStyles() {
   if (document.getElementById('saveToastStyles')) return
@@ -86,6 +94,222 @@ function showSaveToast(message, type = 'success') {
   }, 2500)
 }
 
+function ensureReportStyles() {
+  if (document.getElementById('reportProblemStyles')) return
+  const style = document.createElement('style')
+  style.id = 'reportProblemStyles'
+  style.textContent = `
+    .report-wrap {
+      margin: 0 0 12px 0;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    .btn-report {
+      align-self: flex-start;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--muted);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-family: var(--sans);
+      cursor: pointer;
+    }
+    .btn-report:hover {
+      border-color: var(--ink);
+      color: var(--ink);
+    }
+    .report-panel {
+      display: none;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .report-panel.show { display: flex; }
+    .report-select {
+      min-width: 270px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      background: #fff;
+      font-size: 12px;
+      font-family: var(--sans);
+      color: var(--ink);
+    }
+    .btn-report-submit,
+    .btn-report-cancel {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 12px;
+      font-family: var(--sans);
+      cursor: pointer;
+      background: #fff;
+      color: var(--ink);
+    }
+    .btn-report-submit {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-light);
+    }
+    .report-meta {
+      font-size: 11px;
+      color: var(--muted);
+    }
+    @media (max-width: 700px) {
+      .report-wrap {
+        max-width: 100%;
+        width: 100%;
+      }
+      .report-panel {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .report-select,
+      .btn-report-submit,
+      .btn-report-cancel {
+        width: 100%;
+        min-width: 0;
+      }
+      .btn-report {
+        width: 100%;
+        text-align: left;
+      }
+    }
+  `
+  document.head.appendChild(style)
+}
+
+function ensureReportUI() {
+  if (document.getElementById('reportWrap')) return
+  ensureReportStyles()
+
+  const qText = document.getElementById('qText')
+  if (!qText) return
+
+  const wrap = document.createElement('div')
+  wrap.id = 'reportWrap'
+  wrap.className = 'report-wrap'
+  wrap.innerHTML = `
+    <button type="button" class="btn-report" id="reportToggleBtn">Report a problem</button>
+    <div class="report-panel" id="reportPanel">
+      <select class="report-select" id="reportReasonSelect">
+        <option value="">Select issue type</option>
+      </select>
+      <button type="button" class="btn-report-submit" id="reportSubmitBtn">Submit report</button>
+      <button type="button" class="btn-report-cancel" id="reportCancelBtn">Cancel</button>
+    </div>
+    <div class="report-meta" id="reportMeta">Question 1</div>
+  `
+
+  qText.insertAdjacentElement('beforebegin', wrap)
+
+  const select = document.getElementById('reportReasonSelect')
+  REPORT_REASONS.forEach((reason) => {
+    const opt = document.createElement('option')
+    opt.value = reason
+    opt.textContent = reason
+    select.appendChild(opt)
+  })
+
+  const panel = document.getElementById('reportPanel')
+  const toggleBtn = document.getElementById('reportToggleBtn')
+  const cancelBtn = document.getElementById('reportCancelBtn')
+  const submitBtn = document.getElementById('reportSubmitBtn')
+
+  toggleBtn.addEventListener('click', () => {
+    panel.classList.toggle('show')
+  })
+
+  cancelBtn.addEventListener('click', () => {
+    panel.classList.remove('show')
+    select.value = ''
+  })
+
+  submitBtn.addEventListener('click', submitQuestionReport)
+}
+
+function updateReportMeta() {
+  const meta = document.getElementById('reportMeta')
+  if (!meta) return
+  meta.textContent = `Question ${currentIndex + 1}`
+}
+
+function buildFlagEntry(reason, userId) {
+  const timestamp = new Date().toISOString()
+  return `[${timestamp}] ${reason}${userId ? ` (user: ${userId})` : ''}`
+}
+
+function buildNextFlagValue(existingFlag, reason, userId) {
+  const entry = buildFlagEntry(reason, userId)
+  const current = String(existingFlag || '').trim()
+  return current ? `${current}\n${entry}` : entry
+}
+
+async function submitQuestionReport() {
+  if (reportInProgress) return
+  if (hasSubmitted) {
+    showSaveToast('Test already submitted.', 'error')
+    return
+  }
+  if (enforceTimerIfExpired()) return
+
+  const select = document.getElementById('reportReasonSelect')
+  const panel = document.getElementById('reportPanel')
+  const reason = (select?.value || '').trim()
+  const q = questions[currentIndex]
+
+  if (!reason) {
+    showSaveToast('Please select a problem type.', 'error')
+    return
+  }
+  if (!q?.id) {
+    showSaveToast('Could not identify this question.', 'error')
+    return
+  }
+
+  reportInProgress = true
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession()
+    const userId = session?.user?.id || null
+    const nextFlag = buildNextFlagValue(q.flag, reason, userId)
+
+    const { data, error } = await supabaseClient
+      .from('test')
+      .update({ flag: nextFlag })
+      .eq('id', q.id)
+      .select('id')
+      .maybeSingle()
+
+    if (error) {
+      if (error.code === '42703') {
+        showSaveToast('Report setup missing: flag column not found in test table.', 'error')
+      } else {
+        showSaveToast('Could not submit report. Please try again.', 'error')
+      }
+      return
+    }
+
+    if (!data?.id) {
+      showSaveToast('Report not saved. Check update policy (RLS) for test table.', 'error')
+      return
+    }
+
+    q.flag = nextFlag
+    showSaveToast('Thanks. Problem reported successfully.', 'success')
+    if (panel) panel.classList.remove('show')
+    if (select) select.value = ''
+  } catch (_) {
+    showSaveToast('Could not submit report. Please try again.', 'error')
+  } finally {
+    reportInProgress = false
+  }
+}
+
 /* ── INIT ────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', async () => {
   const isAllowed = await guardPage()
@@ -109,6 +333,81 @@ async function getHeaders() {
 function getPaperId() {
   const params = new URLSearchParams(window.location.search)
   return params.get('paper')
+}
+
+function getTimerDeadlineKey() {
+  const paperId = getPaperId() || 'unknown'
+  return `openprep_timer_deadline_v1_${window.location.pathname}_${paperId}`
+}
+
+function readTimerDeadline() {
+  try {
+    const raw = localStorage.getItem(getTimerDeadlineKey())
+    const parsed = Number(raw)
+    return Number.isFinite(parsed) ? parsed : 0
+  } catch (_) {
+    return 0
+  }
+}
+
+function writeTimerDeadline(deadlineMs) {
+  try {
+    localStorage.setItem(getTimerDeadlineKey(), String(deadlineMs))
+  } catch (_) {}
+}
+
+function clearTimerDeadline() {
+  try {
+    localStorage.removeItem(getTimerDeadlineKey())
+  } catch (_) {}
+}
+
+function syncSecondsLeftFromDeadline() {
+  if (!timerDeadlineMs) {
+    secondsLeft = 0
+    return
+  }
+  secondsLeft = Math.max(0, Math.ceil((timerDeadlineMs - Date.now()) / 1000))
+}
+
+function setupOrRestoreTimer(totalSeconds) {
+  const now = Date.now()
+  const storedDeadline = readTimerDeadline()
+
+  if (storedDeadline > now) {
+    timerDeadlineMs = storedDeadline
+  } else {
+    timerDeadlineMs = now + (Number(totalSeconds) || 0) * 1000
+    writeTimerDeadline(timerDeadlineMs)
+  }
+
+  syncSecondsLeftFromDeadline()
+}
+
+function handleTimeExpired() {
+  if (hasSubmitted || submitInProgress) return
+  submitTest(true)
+}
+
+function enforceTimerIfExpired() {
+  if (hasSubmitted || submitInProgress || reviewMode) return false
+  syncSecondsLeftFromDeadline()
+  if (secondsLeft <= 0) {
+    handleTimeExpired()
+    return true
+  }
+  return false
+}
+
+function bindTimerVisibilitySync() {
+  if (timerVisibilityBound) return
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') {
+      if (enforceTimerIfExpired()) return
+      updateTimerDisplay()
+    }
+  })
+  timerVisibilityBound = true
 }
 
 function normalizeQuestionRow(row, index) {
@@ -211,10 +510,11 @@ async function loadQuestions() {
     document.getElementById('qTotal').textContent     = questions.length
     document.getElementById('remainingCount').textContent = questions.length
 
-    secondsLeft = paperData?.duration || 7200
+    setupOrRestoreTimer(paperData?.duration || 7200)
     startTimer()
     buildGrid()
     renderQuestion()
+    ensureReportUI()
     showState('content')
 
   } catch (err) {
@@ -322,10 +622,12 @@ function renderQuestion() {
 
   updateGrid()
   updateStats()
+  updateReportMeta()
 }
 
 function selectAnswer(key) {
   if (reviewMode) return
+  if (enforceTimerIfExpired()) return
   // Toggle: green->white when clicking the same selected option again
   if (answers[currentIndex] === key) {
     delete answers[currentIndex]
@@ -356,6 +658,7 @@ function updateStats() {
 }
 
 function prevQuestion() {
+  if (enforceTimerIfExpired()) return
   if (currentIndex > 0) {
     currentIndex--
     renderQuestion()
@@ -363,6 +666,7 @@ function prevQuestion() {
 }
 
 function nextQuestion() {
+  if (enforceTimerIfExpired()) return
   if (hasSubmitted && !reviewMode) return
   if (currentIndex < questions.length - 1) {
     currentIndex++
@@ -373,21 +677,27 @@ function nextQuestion() {
 }
 
 function jumpTo(index) {
+  if (enforceTimerIfExpired()) return
   currentIndex = index
   renderQuestion()
 }
 
 function startTimer() {
-  updateTimerDisplay()
-  timerInterval = setInterval(() => {
+  bindTimerVisibilitySync()
+  if (timerInterval) clearInterval(timerInterval)
+
+  const tick = () => {
     if (hasSubmitted) return
-    secondsLeft--
+    syncSecondsLeftFromDeadline()
     updateTimerDisplay()
     if (secondsLeft <= 0) {
       clearInterval(timerInterval)
-      submitTest()
+      handleTimeExpired()
     }
-  }, 1000)
+  }
+
+  tick()
+  timerInterval = setInterval(tick, 1000)
 }
 
 function updateTimerDisplay() {
@@ -532,7 +842,7 @@ function showResultModal(result) {
   reviewMode = false
 }
 
-async function submitTest() {
+async function submitTest(isTimeUp = false) {
   if (submitInProgress || hasSubmitted) return
   submitInProgress = true
 
@@ -540,6 +850,7 @@ async function submitTest() {
   if (submitBtn) submitBtn.disabled = true
 
   clearInterval(timerInterval)
+  clearTimerDeadline()
   const result = calculateResult()
 
   let statsSaved = false
@@ -558,7 +869,17 @@ async function submitTest() {
   hasSubmitted = true
   if (submitBtn) submitBtn.textContent = 'Submitted'
   showResultModal(result)
-  showSaveToast(saveMessage, statsSaved ? 'success' : 'error')
+
+  if (isTimeUp) {
+    reviewAnswers()
+    showSaveToast(
+      `Time is over. Test auto-submitted. ${saveMessage}`,
+      statsSaved ? 'success' : 'error'
+    )
+  } else {
+    showSaveToast(saveMessage, statsSaved ? 'success' : 'error')
+  }
+
   submitInProgress = false
 }
 
