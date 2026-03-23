@@ -19,12 +19,12 @@ async function guardPage() {
   try {
     const { data: { session } } = await supabaseClient.auth.getSession()
     if (!session) {
-      window.location.replace('../Signup/auth.html')
+      window.location.replace('/login')
       return false
     }
     return true
   } catch (_) {
-    window.location.replace('../Signup/auth.html')
+    window.location.replace('/login')
     return false
   }
 }

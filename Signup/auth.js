@@ -55,7 +55,7 @@ async function handleGoogleAuth() {
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: getSiteBaseUrl() + '/index.html' }
+    options: { redirectTo: getSiteBaseUrl() + '/' }
   });
 
   if (error) {
@@ -97,7 +97,7 @@ async function handleSignin(e) {
     return;
   }
 
-  window.location.href = getSiteBaseUrl() + '/index.html';
+  window.location.href = getSiteBaseUrl() + '/';
 }
 
 
@@ -178,7 +178,7 @@ async function handleForgot(e) {
   setLoading('forgotSubmit', true);
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: getSiteBaseUrl() + '/Signup/auth.html'
+    redirectTo: getSiteBaseUrl() + '/login'
   });
 
   setLoading('forgotSubmit', false);

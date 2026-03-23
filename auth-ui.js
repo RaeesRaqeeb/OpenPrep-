@@ -166,7 +166,7 @@ if (logoutBtn) {
     logoutBtn.textContent = 'Signing out...'
     logoutBtn.disabled = true
     await supabaseClient.auth.signOut()
-    window.location.href = '/Signup/auth.html'
+    window.location.href = '/login'
   })
 }
 

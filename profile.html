@@ -305,8 +305,8 @@
 
   <!-- ─── NAV ──────────────────────────────────── -->
   <nav>
-    <a href="/index.html" class="nav-logo">Open<span>Prep</span></a>
-    <a href="/index.html" class="nav-back">
+    <a href="/" class="nav-logo">Open<span>Prep</span></a>
+    <a href="/" class="nav-back">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
       Back to home
     </a>
@@ -385,7 +385,7 @@
       /* ── Guard: redirect if not logged in ─────── */
       const { data: { session } } = await supabaseClient.auth.getSession()
       if (!session) {
-        window.location.href = '/Signup/auth.html'
+        window.location.href = '/login'
         return
       }
 
@@ -475,7 +475,7 @@
         btn.textContent = 'Signing out…'
         btn.disabled    = true
         await supabaseClient.auth.signOut()
-        window.location.href = '/Signup/auth.html'
+        window.location.href = '/login'
       })
 
       /* ── Show page ───────────────────────────── */
