@@ -123,7 +123,7 @@ You can also support by:
 | Name | University | Contribution |
 |---|---|---|
 | [Mehdi Ali Qoli](https://github.com/MehdiAliQoli) | IBA Karachi | Founder, platform & all IBA content |
-| [Mushtaq Ahmen](https://github.com/MehdiAliQoli) | COMSAT ISLAMABAD | Contributing to the MDCAT Section |
+| [Mushtaq Ahmed](https://github.com/MushtaqAhmadSaqi)) | COMSAT ISLAMABAD | Contributing to the MDCAT Section |
 
 Want your name here? [Contribute to OpenPrep →](#how-to-contribute)
 
