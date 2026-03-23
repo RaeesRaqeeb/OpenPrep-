@@ -1,42 +1,15 @@
-# ------------------------------------------------------------
-# Netlify redirects/rewrites for OpenPrep.pk
-# - Uses clean URLs (no .html in public links)
-# - Rewrites to existing static HTML files
-# - Includes aliases for common/legacy paths
-# ------------------------------------------------------------
-
-# Core pages
-/                      /index.html                              200
-/privacy               /privacy.html                            200
-/terms                 /termofservice.html                      200
-/terms-of-service      /termofservice.html                      200
-/profile               /profile.html                            200
-
-# Auth
-/login                 /Signup/auth.html                        200
-/signup                /Signup/auth.html                        200
-
-# About & contributors
-/about                 /Aboutus/Aboutus.html                    200
-/contributors          /Contributor/contributors.html           200
-
-# Programs / sections
-/iba                   /IBA-Karachi/selection-page.html         200
-/mdcat                 /Mdcat/Mdcat_subject.html                200
-/practice              /Other_detials/paractice.html            200
-
-# IBA pages
-/iba/english           /IBA-Karachi/IBA_English.html            200
-/iba/math              /IBA-Karachi/IBA_Math.html               200
-/iba/mocktest          /IBA-Karachi/mocktest.html               200
-/iba/past-paper        /IBA-Karachi/pastpaper.html              200
-/iba/question-bank     /IBA-Karachi/Question_Bank.html          200
-/iba/subjects          /IBA-Karachi/subject.html                200
-/iba/test              /IBA-Karachi/test.html                   200
-/iba/test-environment  /IBA-Karachi/TestEnvironment.html        200
-
-# Common aliases and typo-safe routes
-/terms-and-conditions  /termofservice.html                      301
-/contributor           /Contributor/contributors.html           301
-/aboutus               /Aboutus/Aboutus.html                    301
-/other-details         /Other_detials/paractice.html            301
+# Strip .html from old URLs
+/index.html                          /                        301
+/about.html                          /about                   301
+/privacy.html                        /privacy                 301
+/profile.html                        /profile                 301
+/termofservice.html                  /terms                   301
+/Signup/auth.html                    /login                   301
+/Aboutus/Aboutus.html                /about                   301
+/Contributor/contributors.html       /contributors            301
+/Other_detials/paractice.html        /practice                301
+/IBA-Karachi/subject.html            /iba/subjects            301
+/IBA-Karachi/IBA_Math.html           /iba/math                301
+/IBA-Karachi/IBA_English.html        /iba/english             301
+/IBA-Karachi/mocktest.html           /iba/mocktest            301
+/mdcat/mdcat_subject                 /mdcat                   301
