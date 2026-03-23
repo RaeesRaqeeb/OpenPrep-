@@ -13,3 +13,18 @@
 /IBA-Karachi/IBA_English.html        /iba/english             301
 /IBA-Karachi/mocktest.html           /iba/mocktest            301
 /mdcat/mdcat_subject                 /mdcat                   301
+
+# Serve clean URLs from real HTML files
+/                                  /index.html                          200
+/about                             /Aboutus/Aboutus.html                200
+/privacy                           /privacy.html                        200
+/profile                           /profile.html                        200
+/terms                             /termofservice.html                  200
+/login                             /Signup/auth.html                    200
+/contributors                      /Contributor/contributors.html       200
+/practice                          /Other_detials/paractice.html        200
+/iba/subjects                      /IBA-Karachi/subject.html            200
+/iba/math                          /IBA-Karachi/IBA_Math.html           200
+/iba/english                       /IBA-Karachi/IBA_English.html        200
+/iba/mocktest                      /IBA-Karachi/mocktest.html           200
+/mdcat                             /Mdcat/Mdcat_subject.html            200
