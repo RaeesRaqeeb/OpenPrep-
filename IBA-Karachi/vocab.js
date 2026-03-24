@@ -1,6 +1,7 @@
 ;(async function () {
 
   const VOCAB_TEST_ID = '8c855dc9-8b94-44f1-9731-c2c86e632213'
+  const VALID_STATUSES = new Set(['mastered', 'in-progress'])
   
   // Global error handler for any uncaught errors
   window.onerror = (msg, url, line, col, err) => {
@@ -34,7 +35,7 @@
     return
   }
   const userId = session.user.id
-  console.log('✓ Auth OK - User:', userId)
+  const localProgressKey = `openprep:vocab-progress:${VOCAB_TEST_ID}:${userId}`
 
   /* ── State ───────────────────────────────────── */
   let allCards     = []
@@ -45,76 +46,70 @@
   let activeFilter = 'all'
 
   /* ── Fetch vocab cards ───────────────────────── */
-  console.log('Fetching from Vocab_IBA where test_id =', VOCAB_TEST_ID)
-  
   const { data: cards, error: cardsError } = await sb
     .from('Vocab_IBA')
     .select('id, front, back')
     .eq('test_id', VOCAB_TEST_ID)
     .order('id', { ascending: true })
 
-  console.log('Query Result:', {
-    testId: VOCAB_TEST_ID,
-    cardsFetched: cards?.length || 0,
-    error: cardsError?.message || null,
-    sampleCard: cards?.[0] || 'NO CARDS'
-  })
-
   if (cardsError || !cards?.length) {
-    const msg = `Database Error: ${cardsError?.message || 'No vocabulary cards found in Vocab_IBA table'}`
+    const msg = cardsError?.message || 'No vocabulary cards found in Vocab_IBA table'
     showError(msg)
-    console.error(msg, cardsError)
     return
   }
 
   allCards = cards
-  console.log(`✓ Successfully loaded ${allCards.length} cards`)
+  const validCardIds = new Set(allCards.map(c => String(c.id)))
 
   /* ── Fetch saved progress ────────────────────── */
-  const { data: saved } = await sb
+  let serverProgressAvailable = false
+  const { data: saved, error: savedError } = await sb
     .from('flashcard_progress')
     .select('flashcard_id, status')
     .eq('user_id', userId)
     .eq('test_id', VOCAB_TEST_ID)
 
-  console.log('Progress loaded:', saved?.length || 0, 'records')
-  if (saved) saved.forEach(r => { progress[r.flashcard_id] = r.status })
+  if (!savedError && Array.isArray(saved)) {
+    saved.forEach((r) => {
+      const cardId = String(r.flashcard_id)
+      if (validCardIds.has(cardId) && VALID_STATUSES.has(r.status)) {
+        progress[cardId] = r.status
+      }
+    })
+    serverProgressAvailable = true
+  } else if (savedError) {
+    console.warn('flashcard_progress unavailable, using local progress:', savedError.message)
+  }
+
+  // Local fallback keeps state persistence even when DB progress table is unavailable.
+  const localProgress = readLocalProgress(localProgressKey)
+  Object.entries(localProgress).forEach(([cardId, status]) => {
+    if (!progress[cardId] && validCardIds.has(cardId) && VALID_STATUSES.has(status)) {
+      progress[cardId] = status
+    }
+  })
+
+  // If server is available and has no rows yet, push local progress up once.
+  if (serverProgressAvailable && Object.keys(progress).length > 0) {
+    await syncAllProgressToServer(progress)
+  }
 
   /* ── Boot UI ─────────────────────────────────── */
   try {
-    console.log('>> Starting UI boot...')
-    
     // Validate DOM elements exist
     const mainEl = document.getElementById('mainContent')
     const loadingEl = document.getElementById('loadingState')
     const errorEl = document.getElementById('errorState')
     const wordListEl = document.getElementById('wordList')
-    
-    console.log('DOM check:', {
-      mainContent: !!mainEl,
-      loadingState: !!loadingEl,
-      errorState: !!errorEl,
-      wordList: !!wordListEl
-    })
-    
+
     if (!mainEl || !loadingEl || !errorEl || !wordListEl) {
       throw new Error('Missing critical DOM elements')
     }
-    
-    console.log('Before show(): mainContent display =', mainEl.style.display)
-    
+
     show('main')
-    console.log('✓ show("main") called - mainContent display =', mainEl.style.display)
-    
     buildWordList()
-    console.log('✓ buildWordList() completed, word count:', document.querySelectorAll('.word-row').length)
-    
     updateStats()
-    console.log('✓ updateStats() completed')
-    
     setFilter('all')
-    console.log('✓ setFilter("all") completed')
-    console.log('✓✓ Boot complete! UI should be visible now')
   } catch (bootErr) {
     console.error('❌ BOOT ERROR:', bootErr.message, bootErr.stack)
     showError('Failed to render UI: ' + bootErr.message)
@@ -211,7 +206,10 @@
     const card = deck[deckIndex]
     if (!card) return
 
-    progress[card.id] = status
+    const cardKey = String(card.id)
+    progress[cardKey] = status
+    writeLocalProgress(localProgressKey, progress)
+
     updateStats()
     buildWordList()
     renderCard()
@@ -221,15 +219,20 @@
       if (deckIndex < deck.length - 1) nextCard()
     }, 300)
 
-    // Save to Supabase
-    const { error: saveError } = await sb.from('flashcard_progress').upsert({
-      user_id: userId,
-      flashcard_id: card.id,
-      test_id: VOCAB_TEST_ID,
-      status
-    }, { onConflict: 'user_id, flashcard_id' })
-    
-    if (saveError) console.warn('Save error:', saveError.message)
+    // Save to Supabase when progress table is available.
+    const { error: saveError } = await sb.from('flashcard_progress').upsert(
+      {
+        user_id: userId,
+        flashcard_id: card.id,
+        test_id: VOCAB_TEST_ID,
+        status
+      },
+      { onConflict: 'user_id,flashcard_id,test_id' }
+    )
+
+    if (saveError) {
+      console.warn('Could not sync progress to DB, kept locally:', saveError.message)
+    }
   }
 
   /* ── updateStats ─────────────────────────────── */
@@ -305,6 +308,50 @@
     const el = document.getElementById('errorMsg')
     if (el) el.textContent = msg
     console.error('Flashcard error:', msg)
+  }
+
+  function readLocalProgress(key) {
+    try {
+      const raw = localStorage.getItem(key)
+      if (!raw) return {}
+      const parsed = JSON.parse(raw)
+      if (!parsed || typeof parsed !== 'object') return {}
+      return parsed
+    } catch {
+      return {}
+    }
+  }
+
+  function writeLocalProgress(key, progressMap) {
+    try {
+      localStorage.setItem(key, JSON.stringify(progressMap))
+    } catch {
+      // Ignore storage write errors to avoid blocking the flow.
+    }
+  }
+
+  async function syncAllProgressToServer(progressMap) {
+    const entries = Object.entries(progressMap)
+    if (!entries.length) return
+
+    const rows = entries
+      .filter(([cardId, status]) => VALID_STATUSES.has(status))
+      .map(([cardId, status]) => ({
+        user_id: userId,
+        flashcard_id: Number(cardId),
+        test_id: VOCAB_TEST_ID,
+        status
+      }))
+
+    if (!rows.length) return
+
+    const { error } = await sb
+      .from('flashcard_progress')
+      .upsert(rows, { onConflict: 'user_id,flashcard_id,test_id' })
+
+    if (error) {
+      console.warn('Bulk sync to DB failed, local progress retained:', error.message)
+    }
   }
 
   /* ── expose to HTML onclick ──────────────────── */
