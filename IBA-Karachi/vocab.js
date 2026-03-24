@@ -1,6 +1,13 @@
 ;(async function () {
 
   const VOCAB_TEST_ID = '8c855dc9-8b94-44f1-9731-c2c86e632213'
+  
+  // Global error handler for any uncaught errors
+  window.onerror = (msg, url, line, col, err) => {
+    console.error('🚨 GLOBAL ERROR:', msg, 'at', url, line, col)
+    showError(`Unexpected error: ${msg}`)
+    return true
+  }
 
   /* ── Wait for DOM ────────────────────────────── */
   if (document.readyState === 'loading') {
@@ -74,10 +81,44 @@
   if (saved) saved.forEach(r => { progress[r.flashcard_id] = r.status })
 
   /* ── Boot UI ─────────────────────────────────── */
-  show('main')
-  buildWordList()
-  updateStats()
-  setFilter('all')
+  try {
+    console.log('>> Starting UI boot...')
+    
+    // Validate DOM elements exist
+    const mainEl = document.getElementById('mainContent')
+    const loadingEl = document.getElementById('loadingState')
+    const errorEl = document.getElementById('errorState')
+    const wordListEl = document.getElementById('wordList')
+    
+    console.log('DOM check:', {
+      mainContent: !!mainEl,
+      loadingState: !!loadingEl,
+      errorState: !!errorEl,
+      wordList: !!wordListEl
+    })
+    
+    if (!mainEl || !loadingEl || !errorEl || !wordListEl) {
+      throw new Error('Missing critical DOM elements')
+    }
+    
+    console.log('Before show(): mainContent display =', mainEl.style.display)
+    
+    show('main')
+    console.log('✓ show("main") called - mainContent display =', mainEl.style.display)
+    
+    buildWordList()
+    console.log('✓ buildWordList() completed, word count:', document.querySelectorAll('.word-row').length)
+    
+    updateStats()
+    console.log('✓ updateStats() completed')
+    
+    setFilter('all')
+    console.log('✓ setFilter("all") completed')
+    console.log('✓✓ Boot complete! UI should be visible now')
+  } catch (bootErr) {
+    console.error('❌ BOOT ERROR:', bootErr.message, bootErr.stack)
+    showError('Failed to render UI: ' + bootErr.message)
+  }
 
   /* ── Filter tabs ─────────────────────────────── */
   document.querySelectorAll('.filter-tab').forEach(tab => {
