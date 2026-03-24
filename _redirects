@@ -12,6 +12,7 @@
 /IBA-Karachi/IBA_Math.html           /iba/math                301
 /IBA-Karachi/IBA_English.html        /iba/english             301
 /IBA-Karachi/mocktest.html           /iba/mocktest            301
+/IBA-Karachi/vocab.html              /iba/vocab               301
 /mdcat/mdcat_subject                 /mdcat                   301
 
 # Serve clean URLs from real HTML files
@@ -27,4 +28,5 @@
 /iba/math                          /IBA-Karachi/IBA_Math.html           200
 /iba/english                       /IBA-Karachi/IBA_English.html        200
 /iba/mocktest                      /IBA-Karachi/mocktest.html           200
+/iba/vocab                         /IBA-Karachi/vocab.html              200
 /mdcat                             /Mdcat/Mdcat_subject.html            200

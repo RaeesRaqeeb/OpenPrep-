@@ -1,4 +1,16 @@
 (async function () {
+	function showFatalError(message) {
+		const loading = document.getElementById("loadingState");
+		const errorBox = document.getElementById("errorState");
+		const main = document.getElementById("mainContent");
+		const msg = document.getElementById("errorMsg");
+		if (loading) loading.style.display = "none";
+		if (main) main.style.display = "none";
+		if (errorBox) errorBox.style.display = "flex";
+		if (msg) msg.textContent = message;
+	}
+
+	try {
 	const VOCAB_TEST_ID = "8c855dc9-8b94-44f1-9731-c2c86e632213";
 
 	/* ── Init Supabase ───────────────────────────── */
@@ -279,4 +291,8 @@
 	window.nextCard = nextCard;
 	window.markCard = markCard;
 	window.setFilter = setFilter;
+  } catch (err) {
+    console.error("Vocab page failed to initialize", err);
+    showFatalError(err?.message || "Something went wrong while loading vocabulary cards.");
+  }
 })();
