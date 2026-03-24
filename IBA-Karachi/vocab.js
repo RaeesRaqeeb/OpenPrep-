@@ -23,12 +23,21 @@
   /* ── Auth guard ──────────────────────────────── */
   const { data: { session }, error: authError } = await sb.auth.getSession()
   if (authError || !session) {
-    console.error('Auth failed:', authError)
     window.location.href = '/login'
     return
   }
   const userId = session.user.id
-  console.log('✓ Auth successful. User ID:', userId)
+
+  /* ── Get auth headers ────────────────────────── */
+  async function getHeaders() {
+    const { data: { session } } = await sb.auth.getSession()
+    const token = session ? session.access_token : window.SUPABASE_KEY
+    return {
+      'apikey':        window.SUPABASE_KEY,
+      'Authorization': `Bearer ${token}`,
+      'Content-Type':  'application/json'
+    }
+  }
 
   /* ── State ───────────────────────────────────── */
   let allCards     = []
@@ -38,46 +47,44 @@
   let isFlipped    = false
   let activeFilter = 'all'
 
-  /* ── Fetch vocab cards ───────────────────────── */
-  const { data: cards, error: cardsError } = await sb
-    .from('Vocab_IBA')
-    .select('id, front, back')
-    .eq('test_id', VOCAB_TEST_ID)
-    .order('id', { ascending: true })
+  /* ── Fetch vocab cards via REST (avoids RLS header issues) ── */
+  try {
+    const res = await fetch(
+      `${window.SUPABASE_URL}/rest/v1/Vocab_IBA?test_id=eq.${VOCAB_TEST_ID}&select=id,front,back&order=id.asc`,
+      { headers: await getHeaders() }
+    )
 
-  console.log('Vocab fetch result:', {
-    testId: VOCAB_TEST_ID,
-    cardCount: cards?.length || 0,
-    error: cardsError?.message || null,
-    firstCard: cards?.[0] || null
-  })
+    if (!res.ok) {
+      const errBody = await res.json().catch(() => ({}))
+      showError(`Failed to load cards: ${errBody.message || res.status + ' ' + res.statusText}`)
+      return
+    }
 
-  if (cardsError || !cards?.length) {
-    const errMsg = cardsError?.message || 'No vocabulary cards found.'
-    showError(`Database fetch failed: ${errMsg}`)
-    console.error('Vocab fetch error:', cardsError)
+    allCards = await res.json()
+
+    if (!allCards.length) {
+      showError(`No vocabulary cards found. Check that test_id "${VOCAB_TEST_ID}" exists in Vocab_IBA table.`)
+      return
+    }
+
+  } catch (err) {
+    showError(`Network error: ${err.message}`)
     return
   }
 
-  console.log('Progress fetch result:', {
-    recordCount: saved?.length || 0,
-    sample: saved?.slice(0, 2) || []
-  })
-
-  if (saved) saved.forEach(r => { progress[r.flashcard_id] = r.status })
-  console.log(`✓ Loaded progress for ${Object.keys(progress).length} cards`
-  console.log(`✓ Loaded ${allCards.length} vocabulary cards`)
-
   /* ── Fetch saved progress ────────────────────── */
-  const { data: saved } = await sb
-    .from('flashcard_progress')
-    .select('flashcard_id, status')
-  console.log('Booting UI...')
-  show('main')
-  buildWordList()
-  updateStats()
-  setFilter('all')
-  console.log('✓ UI ready with', allCards.length, 'cards').forEach(r => { progress[r.flashcard_id] = r.status })
+  try {
+    const res = await fetch(
+      `${window.SUPABASE_URL}/rest/v1/flashcard_progress?user_id=eq.${userId}&test_id=eq.${VOCAB_TEST_ID}&select=flashcard_id,status`,
+      { headers: await getHeaders() }
+    )
+    if (res.ok) {
+      const saved = await res.json()
+      saved.forEach(r => { progress[r.flashcard_id] = r.status })
+    }
+    // If flashcard_progress table doesn't exist yet — silently continue
+    // progress will just be empty and all cards show as "New"
+  } catch (_) {}
 
   /* ── Boot UI ─────────────────────────────────── */
   show('main')
@@ -186,18 +193,26 @@
       if (deckIndex < deck.length - 1) nextCard()
     }, 300)
 
-    const { error: saveError } = await sb.from('flashcard_progress').upsert(
-      {
-        user_id: userId,
-        flashcard_id: card.id,
-        test_id: VOCAB_TEST_ID,
-        status
-      },
-      { onConflict: 'user_id, flashcard_id' }
-    )
-
-    if (saveError) {
-      console.warn('Could not save progress:', saveError.message)
+    // Save to Supabase via REST
+    try {
+      await fetch(
+        `${window.SUPABASE_URL}/rest/v1/flashcard_progress`,
+        {
+          method:  'POST',
+          headers: {
+            ...await getHeaders(),
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            user_id:      userId,
+            flashcard_id: card.id,
+            test_id:      VOCAB_TEST_ID,
+            status:       status
+          })
+        }
+      )
+    } catch (err) {
+      console.warn('Could not save progress:', err.message)
     }
   }
 
