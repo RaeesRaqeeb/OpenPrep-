@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IBA Vocabulary Flashcards — OpenPrep</title>
+  <meta name="description" content="Master IBA Karachi vocabulary with interactive flashcards. Free on OpenPrep." />
+
+  <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:   #0f0f0f;
+      --ink:     #1a1a1a;
+      --mid:     #444;
+      --muted:   #888;
+      --border:  #e8e8e8;
+      --surface: #f7f7f5;
+      --white:   #ffffff;
+      --green:   #16a34a;
+      --amber:   #d97706;
+      --serif:   'Instrument Serif', Georgia, serif;
+      --sans:    'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+    body  { font-family: var(--sans); background: var(--surface); color: var(--ink); min-height: 100vh; }
+
+    /* ── NAV ─────────────────────────────────────── */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 32px; height: 58px;
+      background: rgba(255,255,255,0.94); border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100; 
+    }
+    .nav-logo { font-family: var(--serif); font-size: 19px; color: var(--black); text-decoration: none; }
+    .nav-logo span { font-style: italic; }
+    .nav-back { font-size: 13px; color: var(--muted); text-decoration: none; display: flex; align-items: center; gap: 5px; transition: color 0.15s; }
+    .nav-back:hover { color: var(--ink); }
+
+    /* ── PAGE SHELL ──────────────────────────────── */
+    .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── LOADING / ERROR ─────────────────────────── */
+    .state-box {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; min-height: 50vh; gap: 12px;
+      color: var(--muted); font-size: 14px; text-align: center;
+    }
+    .spinner {
+      width: 28px; height: 28px; border: 2px solid var(--border);
+      border-top-color: var(--black); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── PAGE HEADER ─────────────────────────────── */
+    .page-header { margin-bottom: 28px; animation: fadeUp 0.4s ease both; }
+    .page-eyebrow { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .page-title { font-family: var(--serif); font-size: 32px; color: var(--black); margin-bottom: 6px; }
+    .page-title em { font-style: italic; }
+    .page-subtitle { font-size: 14px; color: var(--muted); font-weight: 300; }
+
+    /* ── PROGRESS OVERVIEW ───────────────────────── */
+    .progress-overview {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 10px; margin-bottom: 28px;
+      animation: fadeUp 0.4s 0.05s ease both;
+    }
+    .prog-box {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px; text-align: center;
+      transition: box-shadow 0.2s;
+    }
+    .prog-box:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    .prog-val { font-family: var(--serif); font-size: 28px; line-height: 1; margin-bottom: 4px; }
+    .prog-val.green { color: var(--green); }
+    .prog-val.amber { color: var(--amber); }
+    .prog-val.muted { color: var(--muted); }
+    .prog-lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+
+    /* ── OVERALL PROGRESS BAR ────────────────────── */
+    .overall-bar-wrap {
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 12px; padding: 16px 20px; margin-bottom: 28px;
+      animation: fadeUp 0.4s 0.08s ease both;
+    }
+    .overall-bar-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
+    .overall-bar-label { color: var(--mid); font-weight: 500; }
+    .overall-bar-pct { color: var(--black); font-weight: 600; }
+    .bar-track { height: 6px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 99px; background: var(--black); transition: width 1s cubic-bezier(.4,0,.2,1); width: 0%; }
+
+    /* ── FLASHCARD AREA ──────────────────────────── */
+    .flashcard-area { animation: fadeUp 0.4s 0.12s ease both; }
+
+    .card-counter {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .card-counter-text { font-size: 13px; color: var(--muted); }
+    .card-counter-text strong { color: var(--ink); }
+
+    .filter-tabs { display: flex; gap: 6px; }
+    .filter-tab {
+      font-size: 12px; padding: 5px 12px; border-radius: 99px;
+      border: 1px solid var(--border); background: var(--white);
+      color: var(--muted); cursor: pointer; transition: all 0.15s;
+      font-family: var(--sans);
+    }
+    .filter-tab.active { background: var(--black); color: var(--white); border-color: var(--black); }
+
+    /* ── 3D FLIP CARD ────────────────────────────── */
+    .card-scene { perspective: 1200px; margin-bottom: 20px; cursor: pointer; }
+
+    .card-3d {
+      position: relative; width: 100%; height: 240px;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(.4,0,.2,1);
+    }
+    .card-3d.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute; inset: 0;
+      backface-visibility: hidden;
+      border-radius: 16px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px; text-align: center;
+    }
+
+    .card-front-face {
+      background: var(--white);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+    }
+    .card-back-face {
+      background: var(--black);
+      transform: rotateY(180deg);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+
+    .card-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.12em;
+      text-transform: uppercase; margin-bottom: 16px;
+    }
+    .card-front-face .card-label { color: var(--muted); }
+    .card-back-face  .card-label { color: rgba(255,255,255,0.4); }
+
+    .card-word {
+      font-family: var(--serif); font-size: 30px;
+      line-height: 1.2; color: var(--black); margin-bottom: 12px;
+    }
+    .card-back-face .card-word { color: var(--white); font-size: 22px; line-height: 1.5; }
+
+    .card-hint { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 5px; }
+    .card-hint svg { width: 13px; height: 13px; }
+
+    /* Status badge on card */
+    .card-status-badge {
+      position: absolute; top: 14px; right: 14px;
+      font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; padding: 3px 9px; border-radius: 99px;
+    }
+    .badge-mastered    { background: #f0fdf4; color: var(--green); border: 1px solid #bbf7d0; }
+    .badge-in-progress { background: #fffbeb; color: var(--amber); border: 1px solid #fde68a; }
+    .badge-new         { background: var(--surface); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ── ACTION BUTTONS ──────────────────────────── */
+    .card-actions {
+      display: flex; gap: 10px; margin-bottom: 24px;
+      opacity: 0; transform: translateY(6px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      pointer-events: none;
+    }
+    .card-actions.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+    .action-btn {
+      flex: 1; padding: 13px; border-radius: 10px;
+      font-family: var(--sans); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s; border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+    }
+    .btn-again { background: var(--white); color: var(--mid); }
+    .btn-again:hover { border-color: var(--amber); color: var(--amber); background: #fffbeb; }
+    .btn-mastered { background: var(--black); color: var(--white); border-color: var(--black); }
+    .btn-mastered:hover { opacity: 0.88; }
+
+    /* ── NAV ARROWS ──────────────────────────────── */
+    .card-nav { display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .nav-arrow {
+      width: 40px; height: 40px; border-radius: 50%;
+      border: 1px solid var(--border); background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; color: var(--mid);
+    }
+    .nav-arrow:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
+    .nav-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+    .nav-arrow svg { width: 16px; height: 16px; }
+    .nav-pos { font-size: 13px; color: var(--muted); min-width: 60px; text-align: center; }
+
+    /* ── WORD LIST ───────────────────────────────── */
+    .word-list-wrap { margin-top: 40px; animation: fadeUp 0.4s 0.16s ease both; }
+    .section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
+
+    .word-list { display: flex; flex-direction: column; gap: 8px; }
+    .word-row {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 16px;
+      cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .word-row:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-color: #ccc; }
+    .word-row.active { border-color: var(--black); }
+
+    .word-row-status { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .dot-mastered    { background: var(--green); }
+    .dot-in-progress { background: var(--amber); }
+    .dot-new         { background: var(--border); }
+
+    .word-row-front { font-family: var(--serif); font-size: 16px; color: var(--black); flex: 1; }
+    .word-row-back  { font-size: 12px; color: var(--muted); max-width: 280px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .word-row-badge { flex-shrink: 0; }
+
+    /* ── DONE STATE ──────────────────────────────── */
+    .done-state {
+      text-align: center; padding: 48px 24px;
+      background: var(--white); border: 1px solid var(--border);
+      border-radius: 16px; margin-bottom: 24px;
+    }
+    .done-icon { font-size: 40px; margin-bottom: 16px; }
+    .done-title { font-family: var(--serif); font-size: 26px; color: var(--black); margin-bottom: 8px; }
+    .done-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+    .done-btn {
+      display: inline-block; padding: 11px 24px;
+      background: var(--black); color: var(--white);
+      border: none; border-radius: 8px; font-family: var(--sans);
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .done-btn:hover { opacity: 0.85; }
+
+    /* ── ANIMATIONS ──────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 540px) {
+      nav { padding: 0 16px; }
+      .page { padding: 28px 14px 60px; }
+      .card-3d { height: 210px; }
+      .card-word { font-size: 24px; }
+      .progress-overview { grid-template-columns: repeat(3, 1fr); }
+      .word-row-back { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── NAV ──────────────────────────────────── -->
+  <nav>
+    <a href="/index.html" class="nav-logo">Open<span>Prep</span></a>
+    <a href="/iba/subjects" class="nav-back">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      IBA Karachi
+    </a>
+  </nav>
+
+  <!-- ─── PAGE ──────────────────────────────────── -->
+  <div class="page">
+
+    <!-- Loading -->
+    <div class="state-box" id="loadingState">
+      <div class="spinner"></div>
+      <span>Loading flashcards…</span>
+    </div>
+
+    <!-- Error -->
+    <div class="state-box" id="errorState" style="display:none;">
+      <p id="errorMsg" style="color:#dc2626;"></p>
+    </div>
+
+    <!-- Main content -->
+    <div id="mainContent" style="display:none;">
+
+      <!-- Header -->
+      <div class="page-header">
+        <div class="page-eyebrow">IBA Karachi · Verbal</div>
+        <div class="page-title">Vocabulary <em>Flashcards</em></div>
+        <div class="page-subtitle">Click a card to reveal its meaning. Mark each word as you go.</div>
+      </div>
+
+      <!-- Progress overview -->
+      <div class="progress-overview">
+        <div class="prog-box">
+          <div class="prog-val green" id="masteredCount">0</div>
+          <div class="prog-lbl">Mastered</div>
+        </div>
+        <div class="prog-box">
+          <div class="prog-val amber" id="inProgressCount">0</div>
+          <div class="prog-lbl">In Progress</div>
+        </div>
+        <div class="prog-box">
+          <div class="prog-val muted" id="newCount">0</div>
+          <div class="prog-lbl">Not Started</div>
+        </div>
+      </div>
+
+      <!-- Overall bar -->
+      <div class="overall-bar-wrap">
+        <div class="overall-bar-header">
+          <span class="overall-bar-label">Overall mastery</span>
+          <span class="overall-bar-pct" id="masteryPct">0%</span>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" id="masteryBar"></div>
+        </div>
+      </div>
+
+      <!-- Flashcard area -->
+      <div class="flashcard-area">
+
+        <div class="card-counter">
+          <span class="card-counter-text">
+            Showing <strong id="deckLabel">all cards</strong>
+          </span>
+          <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="new">Not started</button>
+            <button class="filter-tab" data-filter="in-progress">In progress</button>
+            <button class="filter-tab" data-filter="mastered">Mastered</button>
+          </div>
+        </div>
+
+        <!-- Done state (shown when deck is empty) -->
+        <div class="done-state" id="doneState" style="display:none;">
+          <div class="done-icon">🎉</div>
+          <div class="done-title">Deck complete</div>
+          <div class="done-sub">You've gone through all the cards in this filter.<br>Switch filters or review your progress below.</div>
+          <button class="done-btn" onclick="setFilter('all')">Review all cards</button>
+        </div>
+
+        <!-- Card -->
+        <div id="cardArea">
+          <div class="card-scene" id="cardScene" onclick="flipCard()">
+            <div class="card-3d" id="card3d">
+
+              <div class="card-face card-front-face">
+                <span class="card-status-badge badge-new" id="cardBadge">New</span>
+                <div class="card-label">Word</div>
+                <div class="card-word" id="cardFront">—</div>
+                <div class="card-hint">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5"/></svg>
+                  Click to reveal meaning
+                </div>
+              </div>
+
+              <div class="card-face card-back-face">
+                <div class="card-label">Meaning</div>
+                <div class="card-word" id="cardBack">—</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="card-actions" id="cardActions">
+            <button class="action-btn btn-again" onclick="markCard('in-progress')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
+              Review again
+            </button>
+            <button class="action-btn btn-mastered" onclick="markCard('mastered')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Got it — Mastered
+            </button>
+          </div>
+
+          <!-- Nav -->
+          <div class="card-nav">
+            <button class="nav-arrow" id="prevBtn" onclick="prevCard()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <span class="nav-pos" id="navPos">1 / 1</span>
+            <button class="nav-arrow" id="nextBtn" onclick="nextCard()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Word list -->
+      <div class="word-list-wrap">
+        <div class="section-label">All words</div>
+        <div class="word-list" id="wordList"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/supabase.js"></script>
+  <script>
+  ;(async function () {
+
+    const VOCAB_TEST_ID = '8c855dc9-8b94-44f1-9731-c2c86e632213'
+
+    /* ── Init Supabase ───────────────────────────── */
+    const sb = window.__openprepSupabaseClient || (() => {
+      const c = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY)
+      window.__openprepSupabaseClient = c
+      return c
+    })()
+
+    /* ── Guard ───────────────────────────────────── */
+    const { data: { session } } = await sb.auth.getSession()
+    if (!session) { window.location.href = '/login'; return }
+    const userId = session.user.id
+
+    /* ── State ───────────────────────────────────── */
+    let allCards    = []   // full list from DB
+    let progress    = {}   // { cardId: 'mastered' | 'in-progress' }
+    let deck        = []   // filtered list currently shown
+    let deckIndex   = 0
+    let isFlipped   = false
+    let activeFilter = 'all'
+
+    /* ── Fetch cards ─────────────────────────────── */
+    const { data: cards, error } = await sb
+      .from('Vocab_IBA')
+      .select('id, front, back')
+      .eq('test_id', VOCAB_TEST_ID)
+      .order('id', { ascending: true })
+
+    if (error || !cards || cards.length === 0) {
+      show('error')
+      document.getElementById('errorMsg').textContent =
+        error?.message || 'No vocabulary cards found for this test.'
+      return
+    }
+
+    allCards = cards
+
+    /* ── Fetch saved progress ────────────────────── */
+    const { data: savedProgress } = await sb
+      .from('flashcard_progress')
+      .select('flashcard_id, status')
+      .eq('user_id', userId)
+      .eq('test_id', VOCAB_TEST_ID)
+
+    if (savedProgress) {
+      savedProgress.forEach(r => { progress[r.flashcard_id] = r.status })
+    }
+
+    /* ── Build UI ────────────────────────────────── */
+    show('main')
+    buildWordList()
+    updateStats()
+    setFilter('all')
+
+    /* ── Filter tabs ─────────────────────────────── */
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', () => setFilter(tab.dataset.filter))
+    })
+
+    function setFilter(filter) {
+      activeFilter = filter
+      document.querySelectorAll('.filter-tab').forEach(t => {
+        t.classList.toggle('active', t.dataset.filter === filter)
+      })
+
+      if (filter === 'all') {
+        deck = [...allCards]
+        document.getElementById('deckLabel').textContent = 'all cards'
+      } else if (filter === 'mastered') {
+        deck = allCards.filter(c => progress[c.id] === 'mastered')
+        document.getElementById('deckLabel').textContent = 'mastered cards'
+      } else if (filter === 'in-progress') {
+        deck = allCards.filter(c => progress[c.id] === 'in-progress')
+        document.getElementById('deckLabel').textContent = 'in progress cards'
+      } else if (filter === 'new') {
+        deck = allCards.filter(c => !progress[c.id])
+        document.getElementById('deckLabel').textContent = 'not started cards'
+      }
+
+      deckIndex = 0
+      resetFlip()
+
+      if (deck.length === 0) {
+        document.getElementById('doneState').style.display = ''
+        document.getElementById('cardArea').style.display  = 'none'
+      } else {
+        document.getElementById('doneState').style.display = 'none'
+        document.getElementById('cardArea').style.display  = ''
+        renderCard()
+      }
+    }
+
+    /* ── Render card ─────────────────────────────── */
+    function renderCard() {
+      if (!deck.length) return
+      const card   = deck[deckIndex]
+      const status = progress[card.id] || 'new'
+
+      document.getElementById('cardFront').textContent = card.front
+      document.getElementById('cardBack').textContent  = card.back
+      document.getElementById('navPos').textContent    = `${deckIndex + 1} / ${deck.length}`
+
+      // Badge
+      const badge = document.getElementById('cardBadge')
+      badge.className = 'card-status-badge'
+      if (status === 'mastered') {
+        badge.classList.add('badge-mastered')
+        badge.textContent = 'Mastered'
+      } else if (status === 'in-progress') {
+        badge.classList.add('badge-in-progress')
+        badge.textContent = 'In Progress'
+      } else {
+        badge.classList.add('badge-new')
+        badge.textContent = 'New'
+      }
+
+      // Nav arrows
+      document.getElementById('prevBtn').disabled = deckIndex === 0
+      document.getElementById('nextBtn').disabled = deckIndex === deck.length - 1
+
+      // Highlight in word list
+      document.querySelectorAll('.word-row').forEach(r => {
+        r.classList.toggle('active', r.dataset.id === card.id)
+      })
+
+      resetFlip()
+    }
+
+    /* ── Flip ────────────────────────────────────── */
+    function flipCard() {
+      isFlipped = !isFlipped
+      document.getElementById('card3d').classList.toggle('flipped', isFlipped)
+      document.getElementById('cardActions').classList.toggle('visible', isFlipped)
+    }
+
+    function resetFlip() {
+      isFlipped = false
+      document.getElementById('card3d').classList.remove('flipped')
+      document.getElementById('cardActions').classList.remove('visible')
+    }
+
+    /* ── Nav ─────────────────────────────────────── */
+    function prevCard() {
+      if (deckIndex > 0) { deckIndex--; renderCard() }
+    }
+    function nextCard() {
+      if (deckIndex < deck.length - 1) { deckIndex++; renderCard() }
+    }
+
+    /* ── Mark card ───────────────────────────────── */
+    async function markCard(status) {
+      const card = deck[deckIndex]
+      if (!card) return
+
+      progress[card.id] = status
+      updateStats()
+      buildWordList()
+      renderCard()
+
+      // Auto advance
+      setTimeout(() => {
+        if (deckIndex < deck.length - 1) nextCard()
+      }, 300)
+
+      // Save to Supabase
+      await sb.from('flashcard_progress').upsert({
+        user_id:      userId,
+        flashcard_id: card.id,
+        test_id:      VOCAB_TEST_ID,
+        status:       status
+      }, { onConflict: 'user_id, flashcard_id' })
+    }
+
+    /* ── Stats ───────────────────────────────────── */
+    function updateStats() {
+      const mastered   = allCards.filter(c => progress[c.id] === 'mastered').length
+      const inProgress = allCards.filter(c => progress[c.id] === 'in-progress').length
+      const newCards   = allCards.filter(c => !progress[c.id]).length
+      const pct        = Math.round((mastered / allCards.length) * 100)
+
+      document.getElementById('masteredCount').textContent  = mastered
+      document.getElementById('inProgressCount').textContent = inProgress
+      document.getElementById('newCount').textContent       = newCards
+      document.getElementById('masteryPct').textContent     = pct + '%'
+
+      setTimeout(() => {
+        document.getElementById('masteryBar').style.width = pct + '%'
+      }, 100)
+    }
+
+    /* ── Word list ───────────────────────────────── */
+    function buildWordList() {
+      const list = document.getElementById('wordList')
+      list.innerHTML = ''
+
+      allCards.forEach((card, i) => {
+        const status = progress[card.id] || 'new'
+        const row    = document.createElement('div')
+        row.className   = 'word-row'
+        row.dataset.id  = card.id
+
+        const dotClass = status === 'mastered' ? 'dot-mastered'
+                       : status === 'in-progress' ? 'dot-in-progress'
+                       : 'dot-new'
+
+        const badgeHtml = status === 'mastered'
+          ? `<span class="card-status-badge badge-mastered" style="font-size:10px;padding:2px 8px;">Mastered</span>`
+          : status === 'in-progress'
+          ? `<span class="card-status-badge badge-in-progress" style="font-size:10px;padding:2px 8px;">In Progress</span>`
+          : ''
+
+        row.innerHTML = `
+          <div class="word-row-status ${dotClass}"></div>
+          <div class="word-row-front">${card.front}</div>
+          <div class="word-row-back">${card.back}</div>
+          <div class="word-row-badge">${badgeHtml}</div>
+        `
+
+        row.addEventListener('click', () => {
+          // Jump to this card in current deck
+          const idxInDeck = deck.findIndex(c => c.id === card.id)
+          if (idxInDeck >= 0) {
+            deckIndex = idxInDeck
+            renderCard()
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          } else {
+            // Card not in current filter — switch to all
+            setFilter('all')
+            const newIdx = deck.findIndex(c => c.id === card.id)
+            if (newIdx >= 0) { deckIndex = newIdx; renderCard() }
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }
+        })
+
+        list.appendChild(row)
+      })
+    }
+
+    /* ── Show/hide states ────────────────────────── */
+    function show(state) {
+      document.getElementById('loadingState').style.display = state === 'loading' ? 'flex' : 'none'
+      document.getElementById('errorState').style.display   = state === 'error'   ? 'flex' : 'none'
+      document.getElementById('mainContent').style.display  = state === 'main'    ? ''     : 'none'
+    }
+
+    /* ── Expose for HTML onclick ─────────────────── */
+    window.flipCard    = flipCard
+    window.prevCard    = prevCard
+    window.nextCard    = nextCard
+    window.markCard    = markCard
+    window.setFilter   = setFilter
+
+  })()
+  </script>
+
+</body>
+</html>
