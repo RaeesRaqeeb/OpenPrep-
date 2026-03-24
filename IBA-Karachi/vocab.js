@@ -23,10 +23,12 @@
   /* ── Auth guard ──────────────────────────────── */
   const { data: { session }, error: authError } = await sb.auth.getSession()
   if (authError || !session) {
+    console.error('Auth failed:', authError)
     window.location.href = '/login'
     return
   }
   const userId = session.user.id
+  console.log('✓ Auth successful. User ID:', userId)
 
   /* ── State ───────────────────────────────────── */
   let allCards     = []
@@ -43,21 +45,39 @@
     .eq('test_id', VOCAB_TEST_ID)
     .order('id', { ascending: true })
 
+  console.log('Vocab fetch result:', {
+    testId: VOCAB_TEST_ID,
+    cardCount: cards?.length || 0,
+    error: cardsError?.message || null,
+    firstCard: cards?.[0] || null
+  })
+
   if (cardsError || !cards?.length) {
-    showError(cardsError?.message || 'No vocabulary cards found.')
+    const errMsg = cardsError?.message || 'No vocabulary cards found.'
+    showError(`Database fetch failed: ${errMsg}`)
+    console.error('Vocab fetch error:', cardsError)
     return
   }
 
-  allCards = cards
+  console.log('Progress fetch result:', {
+    recordCount: saved?.length || 0,
+    sample: saved?.slice(0, 2) || []
+  })
+
+  if (saved) saved.forEach(r => { progress[r.flashcard_id] = r.status })
+  console.log(`✓ Loaded progress for ${Object.keys(progress).length} cards`
+  console.log(`✓ Loaded ${allCards.length} vocabulary cards`)
 
   /* ── Fetch saved progress ────────────────────── */
   const { data: saved } = await sb
     .from('flashcard_progress')
     .select('flashcard_id, status')
-    .eq('user_id', userId)
-    .eq('test_id', VOCAB_TEST_ID)
-
-  if (saved) saved.forEach(r => { progress[r.flashcard_id] = r.status })
+  console.log('Booting UI...')
+  show('main')
+  buildWordList()
+  updateStats()
+  setFilter('all')
+  console.log('✓ UI ready with', allCards.length, 'cards').forEach(r => { progress[r.flashcard_id] = r.status })
 
   /* ── Boot UI ─────────────────────────────────── */
   show('main')
