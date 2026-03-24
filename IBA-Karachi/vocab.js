@@ -297,7 +297,7 @@
   function show(state) {
     document.getElementById('loadingState').style.display = state === 'loading' ? 'flex' : 'none'
     document.getElementById('errorState').style.display   = state === 'error'   ? 'flex' : 'none'
-    document.getElementById('mainContent').style.display  = state === 'main'    ? ''     : 'none'
+    document.getElementById('mainContent').style.display  = state === 'main'    ? 'block' : 'none'
   }
 
   function showError(msg) {
