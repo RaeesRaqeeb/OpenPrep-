@@ -31,7 +31,8 @@
   /* ── Auth guard ──────────────────────────────── */
   const { data: { session }, error: authError } = await sb.auth.getSession()
   if (authError || !session) {
-    window.location.href = '/login'
+    const nextPath = window.location.pathname + window.location.search + window.location.hash
+    window.location.href = '/login?next=' + encodeURIComponent(nextPath)
     return
   }
   const userId = session.user.id

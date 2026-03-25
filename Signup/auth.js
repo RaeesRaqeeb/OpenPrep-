@@ -16,6 +16,7 @@ if (!SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+const NEXT_PATH_STORAGE_KEY = 'openprep_post_login_next'
 
 function getSiteBaseUrl() {
   if (window.location.protocol === 'file:') {
@@ -23,6 +24,42 @@ function getSiteBaseUrl() {
   }
   return window.location.origin;
 }
+
+function normalizeNextPath(nextPath) {
+  if (!nextPath || typeof nextPath !== 'string') return '/';
+  if (!nextPath.startsWith('/')) return '/';
+  if (nextPath.startsWith('//')) return '/';
+  return nextPath;
+}
+
+function readPostLoginPath() {
+  const params = new URLSearchParams(window.location.search);
+  const nextFromQuery = params.get('next');
+
+  if (nextFromQuery) {
+    sessionStorage.setItem(NEXT_PATH_STORAGE_KEY, nextFromQuery);
+  }
+
+  return normalizeNextPath(nextFromQuery || sessionStorage.getItem(NEXT_PATH_STORAGE_KEY) || '/');
+}
+
+function consumePostLoginPath() {
+  const path = readPostLoginPath();
+  sessionStorage.removeItem(NEXT_PATH_STORAGE_KEY);
+  return path;
+}
+
+async function redirectIfAlreadySignedIn() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) return;
+
+  const nextPath = consumePostLoginPath();
+  window.location.replace(getSiteBaseUrl() + nextPath);
+}
+
+redirectIfAlreadySignedIn().catch(() => {
+  // Keep the auth page usable even if session lookup fails.
+});
 
 
 
@@ -52,10 +89,11 @@ function switchTab(tab) {
 async function handleGoogleAuth() {
   setLoading('googleSigninBtn', true);
   setLoading('googleSignupBtn', true);
+  const nextPath = readPostLoginPath();
 
   const { error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: getSiteBaseUrl() + '/' }
+    options: { redirectTo: getSiteBaseUrl() + '/login?next=' + encodeURIComponent(nextPath) }
   });
 
   if (error) {
@@ -97,7 +135,8 @@ async function handleSignin(e) {
     return;
   }
 
-  window.location.href = getSiteBaseUrl() + '/';
+  const nextPath = consumePostLoginPath();
+  window.location.href = getSiteBaseUrl() + nextPath;
 }
 
 

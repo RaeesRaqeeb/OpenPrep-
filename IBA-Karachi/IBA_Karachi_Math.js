@@ -16,15 +16,18 @@ const supabaseClient = window.__openprepSupabaseClient || (() => {
 })()
 
 async function guardPage() {
+  const nextPath = window.location.pathname + window.location.search + window.location.hash
+  const loginPath = '/login?next=' + encodeURIComponent(nextPath)
+
   try {
     const { data: { session } } = await supabaseClient.auth.getSession()
     if (!session) {
-      window.location.replace('/login')
+      window.location.replace(loginPath)
       return false
     }
     return true
   } catch (_) {
-    window.location.replace('/login')
+    window.location.replace(loginPath)
     return false
   }
 }
