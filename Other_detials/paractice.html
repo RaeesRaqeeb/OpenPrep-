@@ -1,129 +1,169 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>OpenPrep — Free Test Prep for Pakistani Students</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OpenPrep — Free Test Prep for Pakistani Students</title>
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+    <!-- Google Fonts -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
 
-  <!-- Your stylesheet -->
-  <link rel="stylesheet" href="\openprep.css"/>
-</head>
-<body>
+    <!-- Your stylesheet -->
+    <link rel="stylesheet" href="\openprep.css" />
+  </head>
+  <body>
+    <!-- ─── NAV ──────────────────────────────────────── -->
+    <nav>
+      <div class="brand-block">
+        <a href="/">
+          <div class="logo">Open<span>Prep</span></div>
+        </a>
+        <div class="tagline">Open Prep Open doors</div>
+      </div>
+      <ul class="nav-links">
+        <li><a href="/#coverage">Exams</a></li>
+        <li><a href="/practice">Practice</a></li>
+        <li><a href="/contributors">Contributors</a></li>
+        <li><a href="/about">About</a></li>
+      </ul>
+      <a href="/login" class="nav-cta">Start Free →</a>
+    </nav>
 
-  <!-- ─── NAV ──────────────────────────────────────── -->
-  <nav>
-    <div class="brand-block">
-      <a href="/">
-        <div class="logo">Open<span>Prep</span></div>
-      </a>
-      <div class="tagline">Open Prep Open doors</div>
-    </div>
-    <ul class="nav-links">
-      <li><a href="/#coverage">Exams</a></li>
-      <li><a href="/practice">Practice</a></li>
-      <li><a href="/contributors">Contributors</a></li>
-      <li><a href="/about">About</a></li>
-    </ul>
-    <a href="/login" class="nav-cta">Start Free →</a>
-  </nav>
+    <!-- ─── UNIVERSITY COVERAGE ──────────────────────── -->
+    <section class="coverage" id="coverage">
+      <div class="section-label">What we cover</div>
 
-   <!-- ─── UNIVERSITY COVERAGE ──────────────────────── -->
-  <section class="coverage" id="coverage">
-    <div class="section-label">What we cover</div>
+      <div class="tab-row">
+        <div class="tab active" data-filter="all">All exams</div>
+        <div class="tab" data-filter="university">Universities</div>
+        <div class="tab" data-filter="medical">Medical</div>
+        <div class="tab" data-filter="engineering">Engineering</div>
+      </div>
 
-    <div class="tab-row">
-      <div class="tab active" data-filter="all">All exams</div>
-      <div class="tab" data-filter="university">Universities</div>
-      <div class="tab" data-filter="medical">Medical</div>
-      <div class="tab" data-filter="engineering">Engineering</div>
-    </div>
+      <div class="exam-grid">
+        <a href="/iba/subjects" data-category="university">
+          <div class="exam-card">
+            <div class="exam-tag">University</div>
+            <img
+              class="university-logo"
+              src="../logo_IBA_Karachi.png"
+              alt="IBA Karachi Logo"
+            />
+            <h3>IBA Karachi</h3>
+            <p>
+              Full prep for IBA's aptitude test — quantitative, verbal and
+              analytical.
+            </p>
+            <div class="exam-meta">
+              <span><strong>2,100+</strong> questions with explanation</span>
+              <span><strong>10+</strong> mock tests and past papers</span>
+            </div>
+            <div class="exam-card-btn">
+              Start Preparing
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </div>
+          </div>
+        </a>
 
-    <div class="exam-grid">
+        <a
+          href="../Mdcat/Mdcat_subject.html"
+          data-category="medical"
+        >
+          <div class="exam-card">
+            <div class="exam-tag">Medical</div>
+            <img
+              class="university-logo"
+              src="../Mdcat/PMDC.png"
+              alt="MDCAT Logo"
+            />
+            <h3>MDCAT</h3>
 
-      <a href="\IBA-Karachi/subject.html" style="text-decoration: none" data-category="university">
-        <div class="exam-card">
-          <div class="exam-tag">University</div>
-          <img class="university-logo" src="../logo_IBA_Karachi.png" alt="IBA Karachi Logo"/>
-          <h3>IBA Karachi</h3>
-          
-          <p>Full prep for IBA's aptitude test — quantitative, verbal and analytical.</p>
+            <p>
+              Full prep for MDCAT — physics, chemistry, biology, English and
+              Logical Reasoning
+            </p>
+            <div class="exam-meta">
+              <span><strong>2,000+</strong> questions</span>
+              <span><strong>10</strong> mock tests</span>
+            </div>
+          </div>
+        </a>
+
+        <div
+          class="exam-card exam-card--coming-soon"
+          data-category="engineering"
+        >
+          <div class="exam-tag exam-tag--coming-soon">Engineering</div>
+          <div class="coming-soon-badge">Coming Soon</div>
+          <h3>ECAT</h3>
+          <p>
+            Math, Physics, Chemistry and English for UET and other engineering
+            university entry tests.
+          </p>
           <div class="exam-meta">
-            <span><strong>1,200+</strong> questions</span>
-            <span><strong>8</strong> mock tests</span>
+            <span><strong>—</strong> questions</span>
+            <span><strong>—</strong> mock tests</span>
+          </div>
+          <div class="coming-soon-footer">
+            🔔 Available soon — check back later!
           </div>
         </div>
-      </a>
 
-      <a href="../Mdcat/Mdcat_subject.html" style="text-decoration:none" data-category="medical">
-        <div class="exam-card">
-          <div class="exam-tag">Medical</div>
-          <img class="university-logo" src="../Mdcat/PMDC.png" alt="MDCAT Logo" />
-          <h3>MDCAT</h3>
-          
-          <p>Full prep for MDCAT — physics, chemistry, biology, English and Logical Reasoning </p>
+        <div
+          class="exam-card exam-card--coming-soon"
+          data-category="university"
+        >
+          <div class="exam-tag exam-tag--coming-soon">University</div>
+          <div class="coming-soon-badge">Coming Soon</div>
+          <h3>LCAT</h3>
+          <p>Math, Physics, Chemistry and English for LUMS Admission Test.</p>
           <div class="exam-meta">
-            <span><strong>2,000+</strong> questions</span>
-            <span><strong>10</strong> mock tests</span>
+            <span><strong>—</strong> questions</span>
+            <span><strong>—</strong> mock tests</span>
+          </div>
+          <div class="coming-soon-footer">
+            🔔 Available soon — check back later!
           </div>
         </div>
-      </a>
 
-
-      <div class="exam-card exam-card--coming-soon" data-category="engineering">
-        <div class="exam-tag exam-tag--coming-soon">Engineering</div>
-        <div class="coming-soon-badge">Coming Soon</div>
-        <h3>ECAT</h3>
-        <p>Math, Physics, Chemistry and English for UET and other engineering university entry tests.</p>
-        <div class="exam-meta">
-          <span><strong>—</strong> questions</span>
-          <span><strong>—</strong> mock tests</span>
-        </div>
-        <div class="coming-soon-footer">
-          🔔 Available soon — check back later!
-        </div>
-      </div>
-
-      <div class="exam-card exam-card--coming-soon" data-category="university">
-        <div class="exam-tag exam-tag--coming-soon">University</div>
-        <div class="coming-soon-badge">Coming Soon</div>
-        <h3>LCAT</h3>
-        <p>Math, Physics, Chemistry and English for LUMS Admission Test.</p>
-        <div class="exam-meta">
-          <span><strong>—</strong> questions</span>
-          <span><strong>—</strong> mock tests</span>
-        </div>
-        <div class="coming-soon-footer">
-          🔔 Available soon — check back later!
+        <div
+          class="exam-card exam-card--coming-soon"
+          data-category="university"
+        >
+          <div class="exam-tag exam-tag--coming-soon">University</div>
+          <div class="coming-soon-badge">Coming Soon</div>
+          <h3>FAST</h3>
+          <p>
+            Math, quantitative, verbal and analytical for FAST Admission Test.
+          </p>
+          <div class="exam-meta">
+            <span><strong>—</strong> questions</span>
+            <span><strong>—</strong> mock tests</span>
+          </div>
+          <div class="coming-soon-footer">
+            🔔 Available soon — check back later!
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="exam-card exam-card--coming-soon" data-category="university">
-        <div class="exam-tag exam-tag--coming-soon">University</div>
-        <div class="coming-soon-badge">Coming Soon</div>
-        <h3>FAST</h3>
-        <p>Math, quantitative, verbal and analytical for FAST Admission Test.</p>
-        <div class="exam-meta">
-          <span><strong>—</strong> questions</span>
-          <span><strong>—</strong> mock tests</span>
-        </div>
-        <div class="coming-soon-footer">
-          🔔 Available soon — check back later!
-        </div>
-      </div>
+    <footer>
+      <p>OpenPrep — free forever, open source always</p>
+      <p>Made with care by Mehdi Ali Qoli at IBA Karachi</p>
+    </footer>
 
-    </div>
-  </section>
-
-  <footer>
-    <p>OpenPrep — free forever, open source always</p>
-    <p>Made with care by Mehdi Ali Qoli at IBA Karachi</p>
-  </footer>
-
-
-  <script src="../openprep.js"></script>
-
-</body>
+    <script src="../openprep.js"></script>
+  </body>
 </html>
