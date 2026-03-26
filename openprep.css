@@ -303,9 +303,32 @@ h1 em{
   margin-top: 20px;
 }
 
-.exam-grid > a,
+.exam-grid > a{
+  text-decoration: none;
+}
+
 .exam-grid > .exam-card{
   width: 260px;
+}
+
+.exam-card-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 10px 0;
+    background:var(--accent);
+  color: #ffffff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.exam-card:hover .exam-card-btn {
+   background:#155c39;
 }
 
 
