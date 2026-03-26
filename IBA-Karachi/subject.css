@@ -123,20 +123,9 @@ main {
   overflow: hidden;
 }
 
-.subject-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 3px;
-  border-radius: 14px 14px 0 0;
-  opacity: 0;
-  transition: opacity .22s;
-}
 
-.subject-card:hover {
-  box-shadow: 0 6px 28px rgba(0,0,0,.07);
-  transform: translateY(-2px);
-}
+
+
 
 /* per-subject top border colour on hover */
 #card-english:hover  { border-color: var(--english); }
@@ -258,13 +247,32 @@ main {
   color: var(--border);
   transition: color .2s, transform .2s;
 }
-.subject-card:hover .card-arrow {
-  color: var(--muted);
-  transform: translateX(3px);
-}
+
 
 
 /* ── MOCK TEST BANNER ────────────────────────────── */
+.mock-cta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.mock-banner:hover .mock-cta {
+  background: #155c39;
+}
+
+
+
 .mock-banner {
   display: flex;
   align-items: center;
@@ -316,6 +324,31 @@ main {
 
 
 
+/* ── START HERE BUTTON ───────────────────────────── */
+.card-start-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 16px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px 0;
+  width: 50%;
+  background: var(--accent);
+  color: #ffffff;
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.subject-card:hover .card-start-btn {
+  background: #155c39;
+}
+
+
 /* ── TEXT ────────────────────────────────────────── */
 .mock-title {
   font-family: var(--serif);
@@ -332,23 +365,7 @@ main {
   line-height: 1.5;
 }
 
-/* ── CTA ARROW ───────────────────────────────────── */
-.mock-cta {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--muted);
-  white-space: nowrap;
-  flex-shrink: 0;
-  transition: color 0.2s ease, transform 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
 
-.mock-banner:hover .mock-cta {
-  color: var(--ink);
-  transform: translateX(3px);
-}
 
 /* ── RESPONSIVE ──────────────────────────────────── */
 @media (max-width: 480px) {
@@ -529,3 +546,5 @@ border-top:1px solid var(--border);
   justify-content:space-between;
   align-items:center; font-size:12px; color:var(--muted);
 }
+
+
