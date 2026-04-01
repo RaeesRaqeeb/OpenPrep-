@@ -337,9 +337,19 @@ async function getHeaders() {
 }
 
 /* ── GET PAPER ID FROM URL ───────────────────────────────────── */
-function getPaperId() {
+function getPaperInfo() {
   const params = new URLSearchParams(window.location.search)
-  return params.get('paper') || params.get('test_id') || params.get('IBA_Karachi_Math')
+  const knownTables = ['IBA_Karachi_Math', 'MDCAT_Chemistry', 'MDCAT_Physics', 'MDCAT_Biology', 'MDCAT_English', 'MDCAT_Logical_Reasoning'];
+  for (const table of knownTables) {
+    const id = params.get(table);
+    if (id) return { id, table };
+  }
+  const id = params.get('paper') || params.get('test_id');
+  return { id, table: 'IBA_Karachi_Math' };
+}
+
+function getPaperId() {
+  return getPaperInfo().id;
 }
 
 function getTimerDeadlineKey() {
@@ -483,8 +493,9 @@ async function loadQuestions() {
   try {
     // 1. Fetch paper info
     try {
+      const { table } = getPaperInfo();
       const paperRes = await fetch(
-        `${SUPABASE_URL}/rest/v1/IBA_Karachi_Math?test_id=eq.${encodeURIComponent(paperId)}&select=test_id,title,duration`,
+        `${SUPABASE_URL}/rest/v1/${table}?test_id=eq.${encodeURIComponent(paperId)}&select=test_id,title,duration`,
         { headers: await getHeaders() }
       )
       if (paperRes.ok) {
