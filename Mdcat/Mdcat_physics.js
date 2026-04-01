@@ -215,7 +215,7 @@ function buildTestCard(test, chapterName, testIndex) {
   const label = test.label || `${chapterName}-${suffix}`;
   const anchor = document.createElement("a");
   anchor.className = "test-link";
-  anchor.href = `Question_Bank.html?MDCAT_Physics=${test.id}`;
+  anchor.href = `/IBA-Karachi/Question_Bank.html?MDCAT_Physics=${test.id}`;
   anchor.innerHTML = `
     <span class="test-name">${label}</span>
     <span class="test-cta">Practice →</span>
