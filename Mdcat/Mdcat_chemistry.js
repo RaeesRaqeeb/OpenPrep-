@@ -142,14 +142,15 @@ const chemistryChapters = [
 ];
 
 function buildTestCard(test, chapterName, testIndex) {
-  const suffixLabel = testIndex === 1 ? " -II" : "-I";
-  const label = `${chapterName}${suffixLabel}`;
+  const fallbackSuffix = testIndex === 1 ? "II" : "I";
+  const suffix = String(test.suffix || fallbackSuffix).trim();
+  const label = test.label || `${chapterName}-${suffix}`;
   const anchor = document.createElement("a");
   anchor.className = "test-link";
   anchor.href = `Question_Bank.html?MDCAT_Chemistry=${test.id}`;
   anchor.innerHTML = `
     <span class="test-name">${label}</span>
-    <span class="test-cta">Practice -></span>
+    <span class="test-cta">Practice →</span>
   `;
   return anchor;
 }
