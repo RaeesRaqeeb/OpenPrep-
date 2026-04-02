@@ -218,6 +218,7 @@ nav {
   animation: fadeUp 0.5s 0.15s ease both;
 }
 
+/* ── SHARED FOUNDER/CO-FOUNDER ANIMATIONS ────── */
 .founder-card {
   display: flex;
   align-items: center;
@@ -228,17 +229,125 @@ nav {
   background: var(--white);
   position: relative;
   overflow: hidden;
+  transition:
+    transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 0.35s ease,
+    border-color 0.3s ease,
+    background 0.3s ease;
+  cursor: default;
 }
 
+/* Shimmer overlay for both */
+.founder-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.founder-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.founder-card:hover::after {
+  opacity: 1;
+}
+
+/* Left bar slide-in for both */
 .founder-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 0;
   height: 100%;
-  background: var(--black);
   border-radius: 2px 0 0 2px;
+  transition: width 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.founder-card:hover::before {
+  width: 5px;
+}
+
+/* Photo zoom + transition for both */
+.founder-photo {
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+
+.founder-card:hover .founder-photo {
+  transform: scale(1.08);
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.35s ease;
+}
+
+/* Badge common transition */
+.founder-badge,
+.co-founder-badge {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.founder-card:hover .founder-badge,
+.founder-card:hover .co-founder-badge {
+  transform: scale(1.07);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+}
+
+/* Name common transition */
+.founder-name {
+  transition: color 0.3s ease;
+}
+
+/* ── FOUNDER SPECIFIC (BLACK) ────────────────── */
+.founder-card:not(.co-founder-card)::before {
+  background: var(--black);
+}
+
+.founder-card:not(.co-founder-card)::after {
+  background: linear-gradient(120deg, transparent 30%, rgba(0, 0, 0, 0.03) 50%, transparent 70%);
+}
+
+.founder-card:not(.co-founder-card):hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+}
+
+.founder-card:not(.co-founder-card):hover .founder-photo {
+  box-shadow: 0 0 0 1px var(--black), 0 0 0 3px rgba(0, 0, 0, 0.1);
+}
+
+.founder-card:not(.co-founder-card):hover .founder-badge {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ── CO-FOUNDER SPECIFIC (GREEN) ──────────────── */
+.co-founder-card::before {
+  background: #277f56;
+}
+
+.co-founder-card::after {
+  background: linear-gradient(120deg, transparent 30%, rgba(39, 127, 86, 0.05) 50%, transparent 70%);
+}
+
+.co-founder-card:hover {
+  box-shadow: 0 20px 40px rgba(39, 127, 86, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  border-color: rgba(39, 127, 86, 0.35);
+  background: linear-gradient(135deg, #ffffff 0%, #f0faf5 100%);
+}
+
+.co-founder-card:hover .founder-photo {
+  box-shadow: 0 0 0 1px #277f56, 0 0 0 2px rgba(54, 84, 54, 0.582);
+}
+
+.co-founder-card:hover .co-founder-badge {
+  box-shadow: 0 4px 12px rgba(39, 127, 86, 0.4);
+}
+
+.co-founder-card:hover .founder-name {
+  color: #1a6b45;
 }
 
 .founder-photo {
@@ -322,7 +431,7 @@ nav {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background: var(--black);
+  background: #277f56;
   color: var(--white);
   padding: 4px 10px;
   border-radius: 99px;
