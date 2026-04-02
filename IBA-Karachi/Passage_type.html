@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SAT Reading Test | OpenPrep</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ink:          #111210;
+      --paper:        #F8F7F3;
+      --muted:        #6B6A63;
+      --border:       #E0DED6;
+      --accent:       #1A6B45;
+      --accent-light: #EBF4EE;
+      --accent-dark:  #145538;
+      --surface:      #FFFFFF;
+      --serif:        'Instrument Serif', Georgia, serif;
+      --sans:         'DM Sans', sans-serif;
+      --warn:         #B35A1A;
+      --warn-light:   #FBF0E8;
+      --warn-border:  #F0CDA8;
+      --danger:       #B63A3A;
+      --danger-light: #FBE8E8;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--paper);
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAV ─────────────────────────────────────── */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 48px;
+      height: 60px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      gap: 16px;
+    }
+    .logo {
+      font-family: var(--serif);
+      font-size: 20px;
+      color: var(--ink);
+      text-decoration: none;
+      letter-spacing: -0.3px;
+      flex-shrink: 0;
+    }
+    .logo span { color: var(--accent); }
+
+    .nav-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .paper-title {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .timer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--paper);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      transition: all .3s;
+    }
+    .timer svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .timer.warning { color: var(--warn); background: var(--warn-light); border-color: var(--warn-border); }
+    .timer.danger  { color: var(--danger); background: var(--danger-light); border-color: #F0AEAE; }
+
+    .btn-submit-test {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      cursor: pointer;
+      transition: background .2s, opacity .2s;
+      white-space: nowrap;
+    }
+    .btn-submit-test:hover:not(:disabled) { background: #2a2a28; }
+    .btn-submit-test:disabled { opacity: .5; cursor: default; }
+
+    /* ── PROGRESS BAR ────────────────────────────── */
+    .top-progress {
+      height: 3px;
+      background: var(--border);
+      position: sticky;
+      top: 60px;
+      z-index: 99;
+    }
+    .top-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width .4s ease;
+    }
+
+    /* ── QUESTION COUNTER PILL ───────────────────── */
+    .q-counter-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 48px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+    }
+    .q-counter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+    }
+    .q-counter-pill svg { width: 12px; height: 12px; }
+
+    .mark-review-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--sans);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .mark-review-btn:hover { border-color: var(--warn); color: var(--warn); }
+    .mark-review-btn.marked { background: var(--warn-light); border-color: var(--warn-border); color: var(--warn); }
+    .mark-review-btn svg { width: 13px; height: 13px; }
+
+    /* ── MAIN SPLIT LAYOUT ───────────────────────── */
+    .split-layout {
+      flex: 1;
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ── PASSAGE PANEL ───────────────────────────── */
+    .passage-panel {
+      width: 50%;
+      flex-shrink: 0;
+      overflow-y: auto;
+      padding: 40px 44px;
+      border-right: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .resizer {
+      width: 6px;
+      background: var(--border);
+      cursor: col-resize;
+      flex-shrink: 0;
+      position: relative;
+      transition: background .2s;
+    }
+    .resizer::after {
+      content: '⋮⋮';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%,-50%);
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: -1px;
+    }
+    .resizer:hover { background: var(--accent-light); }
+
+    .passage-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 16px;
+    }
+    .passage-source {
+      font-family: var(--serif);
+      font-size: 13px;
+      font-style: italic;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .passage-text {
+      font-size: 15px;
+      line-height: 1.85;
+      color: var(--ink);
+      font-weight: 300;
+    }
+    .passage-text p { margin-bottom: 16px; }
+    .passage-text p:last-child { margin-bottom: 0; }
+
+    /* highlighted text in passage */
+    .highlight {
+      background: #FFFBCD;
+      border-bottom: 2px solid #E6C84A;
+      border-radius: 2px;
+    }
+
+    /* line numbers */
+    .passage-lines { counter-reset: line; }
+    .passage-line {
+      display: flex;
+      gap: 16px;
+      line-height: 1.85;
+      font-size: 15px;
+      font-weight: 300;
+    }
+    .line-num {
+      font-size: 11px;
+      color: var(--border);
+      min-width: 24px;
+      text-align: right;
+      user-select: none;
+      margin-top: 3px;
+      flex-shrink: 0;
+    }
+
+    /* ── QUESTION PANEL ──────────────────────────── */
+    .question-panel {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 44px;
+      background: var(--paper);
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .q-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .q-subject {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-light);
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .q-num-label {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .q-text {
+      font-size: 15px;
+      line-height: 1.75;
+      color: var(--ink);
+      margin-bottom: 28px;
+      font-family: var(--serif);
+    }
+
+    /* ── OPTIONS ─────────────────────────────────── */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 32px;
+    }
+
+    .option {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      cursor: pointer;
+      transition: border-color .18s, background .18s, transform .12s;
+      user-select: none;
+    }
+    .option:hover { border-color: var(--accent); background: #FAFAF7; transform: translateX(2px); }
+    .option.selected {
+      border-color: var(--ink);
+      background: var(--ink);
+      color: #fff;
+    }
+    .option.selected .option-letter {
+      background: rgba(255,255,255,0.15);
+      border-color: rgba(255,255,255,0.3);
+      color: #fff;
+    }
+    .option.correct { border-color: var(--accent); background: var(--accent-light); }
+    .option.correct .option-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .option.wrong { border-color: var(--danger); background: var(--danger-light); }
+    .option.wrong .option-letter { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+    .option-letter {
+      width: 30px;
+      height: 30px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all .18s;
+      margin-top: 1px;
+    }
+    .option:hover .option-letter { border-color: var(--accent); color: var(--accent); }
+
+    .option-text {
+      font-size: 14px;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    /* ── EXPLANATION ─────────────────────────────── */
+    .explanation-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--ink);
+      display: none;
+      margin-bottom: 28px;
+    }
+    .explanation-box.show { display: block; }
+    .explanation-box strong { color: var(--accent); }
+
+    /* ── NAVIGATION ──────────────────────────────── */
+    .q-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+    .btn-nav {
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--surface);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: all .18s;
+    }
+    .btn-nav:hover:not(:disabled) { border-color: var(--ink); }
+    .btn-nav:disabled { opacity: .35; cursor: default; }
+    .btn-nav-next {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+    .btn-nav-next:hover:not(:disabled) { background: #2a2a28; border-color: #2a2a28; }
+
+    /* ── SIDEBAR ─────────────────────────────────── */
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      border-left: 1px solid var(--border);
+      background: var(--surface);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-header {
+      padding: 20px 20px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 12px;
+    }
+    .legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot.answered  { background: var(--ink); }
+    .dot.current   { background: var(--accent); }
+    .dot.unanswered{ background: var(--border); border: 1px solid #C0BEB6; }
+    .dot.marked    { background: var(--warn); }
+
+    .q-grid {
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      flex: 1;
+    }
+    .q-dot {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      border: 1.5px solid var(--border);
+      background: var(--paper);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .15s;
+      font-family: var(--sans);
+    }
+    .q-dot:hover { border-color: var(--accent); color: var(--accent); }
+    .q-dot.current { border-color: var(--accent); background: var(--accent); color: #fff; }
+    .q-dot.answered { background: var(--ink); border-color: var(--ink); color: #fff; }
+    .q-dot.marked { background: var(--warn-light); border-color: var(--warn-border); color: var(--warn); }
+    .q-dot.marked.answered { background: var(--warn); border-color: var(--warn); color: #fff; }
+
+    .sidebar-stats {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+    .sstat {
+      flex: 1;
+      text-align: center;
+    }
+    .sstat-val {
+      display: block;
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+    .sstat-label {
+      display: block;
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* ── LOADING / ERROR ─────────────────────────── */
+    .loading-state, .error-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 48px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESULT MODAL ────────────────────────────── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(17,18,16,0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+    .modal {
+      background: var(--surface);
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 460px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.16);
+    }
+    .modal-icon {
+      width: 56px; height: 56px;
+      background: var(--accent-light);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: var(--accent);
+    }
+    .modal-icon svg { width: 26px; height: 26px; }
+    .modal h2 { font-family: var(--serif); font-size: 26px; font-weight: 400; margin-bottom: 8px; }
+    .modal p { font-size: 14px; color: var(--muted); margin-bottom: 28px; }
+    .result-stats {
+      display: grid;
+      grid-template-columns: repeat(4,1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .result-stat {
+      background: var(--paper);
+      border-radius: 10px;
+      padding: 14px 8px;
+    }
+    .result-val {
+      display: block;
+      font-size: 22px;
+      font-weight: 500;
+      letter-spacing: -0.5px;
+    }
+    .result-label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 3px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-review {
+      flex: 1;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-review:hover { background: #2a2a28; }
+    .btn-back {
+      flex: 1;
+      font-family: var(--sans);
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--paper);
+      color: var(--ink);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color .2s;
+    }
+    .btn-back:hover { border-color: var(--ink); }
+
+    /* ── SAVE TOAST ──────────────────────────────── */
+    .save-toast {
+      position: fixed;
+      right: 16px; bottom: 16px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #fff;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .2s, transform .2s;
+      box-shadow: 0 10px 24px rgba(0,0,0,.2);
+    }
+    .save-toast.show { opacity: 1; transform: translateY(0); }
+    .save-toast.success { background: var(--accent); }
+    .save-toast.error   { background: var(--danger); }
+
+    /* ── REVIEW BANNER ───────────────────────────── */
+    .review-banner {
+      background: var(--accent-light);
+      border-bottom: 1px solid #B2D9C3;
+      padding: 10px 48px;
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+    .review-banner.show { display: block; }
+
+    /* ── FOOTER ──────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────── */
+    @media (max-width: 900px) {
+      nav { padding: 0 20px; }
+      .q-counter-bar { padding: 8px 20px; }
+
+      .split-layout { flex-direction: column; overflow: auto; }
+
+      .passage-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 28px 20px;
+        max-height: 45vh;
+        overflow-y: auto;
+      }
+      .resizer { display: none; }
+      .question-panel { padding: 28px 20px; overflow: visible; }
+      .sidebar { display: none; }
+      footer { padding: 16px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="logo">Open<span>Prep</span></a>
+    <div class="nav-center">
+      <span class="paper-title" id="paperTitle">SAT Practice — Reading & Writing · Module 1</span>
+    </div>
+    <div class="nav-right">
+      <div class="timer" id="timer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span id="timerDisplay">32:00</span>
+      </div>
+      <button class="btn-submit-test" id="submitTestBtn" onclick="submitTest()">Submit test</button>
+    </div>
+  </nav>
+
+  <!-- PROGRESS BAR -->
+  <div class="top-progress">
+    <div class="top-progress-fill" id="topProgressFill" style="width:0%"></div>
+  </div>
+
+  <!-- REVIEW BANNER -->
+  <div class="review-banner" id="reviewBanner">
+    ✓ Review mode — your answers are shown below. Correct answers are highlighted in green.
+  </div>
+
+  <!-- QUESTION COUNTER BAR -->
+  <div class="q-counter-bar">
+    <div class="q-counter-pill" id="counterPill" onclick="toggleGrid()">
+      <span id="qCounterText">Question 1 of 27</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </div>
+    <button class="mark-review-btn" id="markReviewBtn" onclick="toggleMarkForReview()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+      </svg>
+      Mark for Review
+    </button>
+  </div>
+
+  <!-- MAIN SPLIT LAYOUT -->
+  <div class="split-layout" id="splitLayout">
+
+    <!-- LEFT: PASSAGE -->
+    <div class="passage-panel" id="passagePanel">
+      <span class="passage-label" id="passageLabel">Passage</span>
+      <div class="passage-source" id="passageSource"></div>
+      <div class="passage-text passage-lines" id="passageText"></div>
+    </div>
+
+    <!-- RESIZER -->
+    <div class="resizer" id="resizer"></div>
+
+    <!-- RIGHT: QUESTION + OPTIONS -->
+    <main class="question-panel" id="questionPanel">
+
+      <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <p>Loading questions…</p>
+      </div>
+
+      <div class="error-state" id="errorState" style="display:none">
+        <p id="errorMsg">Something went wrong.</p>
+        <button onclick="init()">Retry</button>
+      </div>
+
+      <div id="questionContent" style="display:none; display:flex; flex-direction:column; flex:1; gap:0;">
+        <div class="q-meta">
+          <span class="q-subject" id="qSubject">Reading & Writing</span>
+          <span class="q-num-label">Q <strong id="qNum">1</strong> / <strong id="qTotal">27</strong></span>
+        </div>
+
+        <div class="q-text" id="qText"></div>
+
+        <div class="options-list" id="optionsList"></div>
+
+        <div class="explanation-box" id="explanationBox"></div>
+
+        <div class="q-nav">
+          <button class="btn-nav" id="prevBtn" onclick="prevQuestion()" disabled>← Previous</button>
+          <button class="btn-nav btn-nav-next" id="nextBtn" onclick="nextQuestion()">Next →</button>
+        </div>
+      </div>
+    </main>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-title">Question map</span>
+        <div class="legend">
+          <span class="legend-item"><span class="dot answered"></span>Answered</span>
+          <span class="legend-item"><span class="dot current"></span>Current</span>
+          <span class="legend-item"><span class="dot unanswered"></span>Unanswered</span>
+          <span class="legend-item"><span class="dot marked"></span>For Review</span>
+        </div>
+      </div>
+      <div class="q-grid" id="qGrid"></div>
+      <div class="sidebar-stats">
+        <div class="sstat">
+          <span class="sstat-val" id="answeredCount">0</span>
+          <span class="sstat-label">Answered</span>
+        </div>
+        <div class="sstat">
+          <span class="sstat-val" id="skippedCount">27</span>
+          <span class="sstat-label">Skipped</span>
+        </div>
+        <div class="sstat">
+          <span class="sstat-val" id="markedCount">0</span>
+          <span class="sstat-label">Marked</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <!-- RESULT MODAL -->
+  <div class="modal-overlay" id="resultModal" style="display:none">
+    <div class="modal">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+        </svg>
+      </div>
+      <h2>Test submitted!</h2>
+      <p>Here's how you did on this module.</p>
+      <div class="result-stats">
+        <div class="result-stat">
+          <span class="result-val" id="scoreVal">0</span>
+          <span class="result-label">Score</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-val" id="correctVal">0</span>
+          <span class="result-label">Correct</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-val" id="wrongVal">0</span>
+          <span class="result-label">Wrong</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-val" id="skippedVal">0</span>
+          <span class="result-label">Skipped</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-review" onclick="reviewAnswers()">Review answers</button>
+        <a href="/" class="btn-back">Back to papers</a>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>OpenPrep — free forever, open source always</p>
+    <p>Made with care by Mehdi Ali Qoli at IBA Karachi</p>
+  </footer>
+
+  <script>
+  /* ════════════════════════════════════════════════
+     DEMO DATA — replace with your Supabase fetch
+  ════════════════════════════════════════════════ */
+  const DEMO_QUESTIONS = [
+    {
+      id: 1,
+      passage: `Neuroscientists studying migratory songbirds have found that these birds dramatically improve their long-distance navigation by adjusting their internal compass to match subtle shifts in Earth's magnetic field. In 2021, Dr. Lina Moretti and her team discovered that the birds achieve this ____ with the planet's magnetic patterns by detecting and interpreting quantum-level changes in specialized retinal proteins.`,
+      passage_source: 'Adapted from "Quantum Sensing in Avian Navigation" — Journal of Neuroscience, 2022',
+      question: 'Which choice completes the text with the most logical and precise word or phrase?',
+      option_a: 'synchronization',
+      option_b: 'hibernation',
+      option_c: 'prediction',
+      option_d: 'moderation',
+      correct: 'a',
+      explanation: '"Synchronization" is the most precise word here because the passage describes the birds adjusting their internal compass to *match* the planet\'s magnetic patterns — which is the definition of synchronization. Hibernation refers to dormancy, prediction implies forecasting a future event, and moderation implies control or reduction, none of which fit the context.',
+      subject: 'Reading & Writing',
+    },
+    {
+      id: 2,
+      passage: `The following text is adapted from a 19th-century geological survey of the American Southwest. The Colorado River, over millions of years, carved the Grand Canyon through layer upon layer of sedimentary rock. Each stratum tells a story: the Kaibab Limestone at the top represents a shallow sea that covered the region some 270 million years ago, while the Vishnu Basement Rocks at the bottom are nearly 2 billion years old. Geologists describe the canyon walls as a "walk through time," where a single hike from rim to river spans more than a quarter of Earth's history.`,
+      passage_source: 'Adapted from Powell, J.W., "Exploration of the Colorado River." 1875.',
+      question: 'According to the text, what does the phrase "walk through time" most likely refer to?',
+      option_a: 'The long duration of a hike from the canyon rim to the river',
+      option_b: 'The way different rock layers represent different geological periods',
+      option_c: 'The speed at which the Colorado River carved the canyon',
+      option_d: 'A museum exhibit about the history of the Grand Canyon',
+      correct: 'b',
+      explanation: 'The text explains that each rock stratum "tells a story" from a different era, with the top layer from 270 million years ago and the bottom layer from 2 billion years ago. The phrase "walk through time" therefore refers to how traversing the canyon\'s layers exposes different geological periods — option B captures this meaning directly.',
+      subject: 'Reading & Writing',
+    },
+    {
+      id: 3,
+      passage: `Marine biologist Dr. Amara Diallo has proposed that coral reefs exhibit a form of collective memory. Her research at the Great Barrier Reef shows that corals which survived a bleaching event in 2016 demonstrated significantly higher thermal tolerance during a subsequent event in 2020. She argues that epigenetic markers — chemical modifications to DNA that do not alter the genetic sequence itself — were passed to offspring, effectively encoding the "memory" of thermal stress. Critics, however, caution that the evidence remains correlational and that alternative explanations, such as natural selection of thermally resistant genotypes, have not been ruled out.`,
+      passage_source: 'Adapted from Diallo, A. et al., "Epigenetic Inheritance in Scleractinian Corals." Nature Climate Change, 2023.',
+      question: 'Which of the following best describes the relationship between Dr. Diallo\'s claim and the critics\' response?',
+      option_a: 'The critics confirm Dr. Diallo\'s findings using a different methodology.',
+      option_b: 'The critics argue that Dr. Diallo\'s study was conducted in the wrong location.',
+      option_c: 'The critics accept the conclusion but disagree about its significance.',
+      option_d: 'The critics acknowledge the observations but suggest an alternative explanation for them.',
+      correct: 'd',
+      explanation: 'The critics do not dispute that thermally tolerant corals were observed — they caution that the evidence is "correlational" and propose that natural selection (not epigenetic inheritance) could explain the same data. This means they accept the observations (higher thermal tolerance) but offer an alternative mechanism, matching option D.',
+      subject: 'Reading & Writing',
+    },
+    {
+      id: 4,
+      passage: `Text 1: Philosopher Hannah Arendt argued that political freedom is only possible in the public realm — the space where citizens appear before one another as equals and engage in collective action. For Arendt, freedom is not an inner state of the will, but something that emerges through speech and deed in shared political life.\n\nText 2: Isaiah Berlin, in contrast, distinguished between "negative liberty" (freedom from external interference) and "positive liberty" (freedom to participate in governance). Berlin was skeptical of positive liberty, warning that it could be used to justify authoritarian regimes claiming to act in citizens' "true" interests.`,
+      passage_source: 'Adapted from contemporary political philosophy scholarship.',
+      question: 'Based on the texts, how would Berlin most likely respond to Arendt\'s conception of freedom?',
+      option_a: 'He would agree that freedom requires active participation in public life.',
+      option_b: 'He would caution that her conception resembles "positive liberty," which he considered potentially dangerous.',
+      option_c: 'He would argue that Arendt\'s focus on collective action ignores the importance of individual rights.',
+      option_d: 'He would contend that political freedom is impossible without a strong state.',
+      correct: 'b',
+      explanation: 'Arendt\'s conception — freedom as something that emerges through participation in collective political life — closely resembles what Berlin called "positive liberty." Since Berlin explicitly warned that positive liberty could be used to justify authoritarian rule, he would most likely apply that same skepticism to Arendt\'s view, making option B the best answer.',
+      subject: 'Reading & Writing',
+    },
+    {
+      id: 5,
+      passage: `A botanist studying alpine meadows recorded the following data on wildflower bloom dates at an elevation of 3,200 meters over a 40-year period:\n\n• 1980–1989: Average first bloom: June 18\n• 1990–1999: Average first bloom: June 12\n• 2000–2009: Average first bloom: June 5\n• 2010–2019: Average first bloom: May 27\n\nThe botanist hypothesized that rising mean temperatures at this elevation — which increased by approximately 1.8°C over the study period — were responsible for the earlier bloom dates.`,
+      passage_source: 'Adapted from Müller, K., "Phenological Shifts in Alpine Flora." Alpine Botany, 2021.',
+      question: 'Which finding, if true, would most directly support the botanist\'s hypothesis?',
+      option_a: 'Wildflower species at lower elevations showed no change in bloom dates over the same period.',
+      option_b: 'Wildflowers at a nearby site where temperatures did not increase showed no shift in bloom dates.',
+      option_c: 'The total number of wildflower species in the meadow decreased over the study period.',
+      option_d: 'Precipitation levels at the site increased significantly between 1980 and 2019.',
+      correct: 'b',
+      explanation: 'The hypothesis claims that rising temperatures caused the earlier blooms. A control site where temperatures did *not* increase and bloom dates also did *not* shift would provide direct comparative support — isolating temperature as the causal variable. Option B describes exactly this kind of controlled comparison.',
+      subject: 'Reading & Writing',
+    },
+  ]
+
+  /* ════════════════════════════════════════════════
+     STATE
+  ════════════════════════════════════════════════ */
+  let questions    = []
+  let answers      = {}        // index → 'a'|'b'|'c'|'d'
+  let marked       = new Set() // indices marked for review
+  let currentIndex = 0
+  let reviewMode   = false
+  let hasSubmitted = false
+  let timerInterval
+  let secondsLeft  = 32 * 60  // 32 minutes default
+
+  /* ════════════════════════════════════════════════
+     INIT
+  ════════════════════════════════════════════════ */
+  document.addEventListener('DOMContentLoaded', init)
+
+  async function init() {
+    showState('loading')
+    // Simulate a small async load (replace with your Supabase fetch)
+    await new Promise(r => setTimeout(r, 400))
+    questions = DEMO_QUESTIONS
+    document.getElementById('qTotal').textContent   = questions.length
+    document.getElementById('skippedCount').textContent = questions.length
+    buildGrid()
+    renderQuestion()
+    startTimer()
+    showState('content')
+  }
+
+  /* ════════════════════════════════════════════════
+     RENDER
+  ════════════════════════════════════════════════ */
+  function renderQuestion() {
+    const q = questions[currentIndex]
+    if (!q) return
+
+    // counter
+    const num = currentIndex + 1
+    document.getElementById('qNum').textContent         = num
+    document.getElementById('qCounterText').textContent = `Question ${num} of ${questions.length}`
+    document.getElementById('qSubject').textContent     = q.subject || 'Reading & Writing'
+
+    // progress
+    document.getElementById('topProgressFill').style.width =
+      ((num / questions.length) * 100).toFixed(1) + '%'
+
+    // passage
+    const passagePanel = document.getElementById('passagePanel')
+    const hasPassage   = !!(q.passage || '').trim()
+    passagePanel.style.display = hasPassage ? '' : 'none'
+    document.getElementById('resizer').style.display   = hasPassage ? '' : 'none'
+
+    if (hasPassage) {
+      document.getElementById('passageLabel').textContent  = q.passage_label || 'Passage'
+      document.getElementById('passageSource').textContent = q.passage_source || ''
+      renderPassage(q.passage)
+    }
+
+    // question
+    document.getElementById('qText').textContent = q.question
+
+    // options
+    const opts   = document.getElementById('optionsList')
+    opts.innerHTML = ''
+    const keys   = ['a','b','c','d']
+    const labels = ['A','B','C','D']
+    const sel    = answers[currentIndex]
+
+    keys.forEach((key, i) => {
+      const val = q[`option_${key}`] || ''
+      if (!val) return
+
+      const el = document.createElement('div')
+      el.className = 'option'
+
+      if (reviewMode) {
+        if (key === q.correct)                          el.classList.add('correct')
+        else if (key === sel && key !== q.correct)      el.classList.add('wrong')
+      } else if (key === sel) {
+        el.classList.add('selected')
+      }
+
+      if (!reviewMode) el.addEventListener('click', () => selectAnswer(key))
+
+      const letter = document.createElement('div')
+      letter.className = 'option-letter'
+      letter.textContent = labels[i]
+
+      const text = document.createElement('div')
+      text.className = 'option-text'
+      text.textContent = val
+
+      el.appendChild(letter)
+      el.appendChild(text)
+      opts.appendChild(el)
+    })
+
+    // explanation
+    const expBox = document.getElementById('explanationBox')
+    if (reviewMode && q.explanation) {
+      const correctLabel = (q.correct || '').toUpperCase()
+      expBox.innerHTML   = `<strong>Correct Answer: ${correctLabel}</strong><br><br>${q.explanation}`
+      expBox.classList.add('show')
+    } else {
+      expBox.classList.remove('show')
+    }
+
+    // nav buttons
+    const prevBtn = document.getElementById('prevBtn')
+    const nextBtn = document.getElementById('nextBtn')
+    prevBtn.disabled    = currentIndex === 0
+    nextBtn.textContent = currentIndex === questions.length - 1 ? 'Finish →' : 'Next →'
+
+    // mark for review button
+    const markBtn = document.getElementById('markReviewBtn')
+    if (marked.has(currentIndex)) {
+      markBtn.classList.add('marked')
+      markBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Marked`
+    } else {
+      markBtn.classList.remove('marked')
+      markBtn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg> Mark for Review`
+    }
+
+    updateGrid()
+    updateStats()
+  }
+
+  function renderPassage(text) {
+    const container = document.getElementById('passageText')
+    container.innerHTML = ''
+    // Split into paragraphs
+    const paragraphs = text.split('\n').filter(l => l.trim())
+    paragraphs.forEach(para => {
+      const p = document.createElement('p')
+      p.textContent = para.trim()
+      container.appendChild(p)
+    })
+  }
+
+  /* ════════════════════════════════════════════════
+     INTERACTIONS
+  ════════════════════════════════════════════════ */
+  function selectAnswer(key) {
+    if (reviewMode || hasSubmitted) return
+    if (answers[currentIndex] === key) delete answers[currentIndex]
+    else answers[currentIndex] = key
+    renderQuestion()
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) { currentIndex--; renderQuestion() }
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) { currentIndex++; renderQuestion() }
+    else if (!hasSubmitted) submitTest()
+  }
+
+  function jumpTo(index) {
+    currentIndex = index
+    renderQuestion()
+  }
+
+  function toggleMarkForReview() {
+    if (reviewMode) return
+    if (marked.has(currentIndex)) marked.delete(currentIndex)
+    else marked.add(currentIndex)
+    renderQuestion()
+  }
+
+  /* ════════════════════════════════════════════════
+     GRID
+  ════════════════════════════════════════════════ */
+  function buildGrid() {
+    const grid = document.getElementById('qGrid')
+    grid.innerHTML = ''
+    questions.forEach((_, i) => {
+      const dot = document.createElement('button')
+      dot.type        = 'button'
+      dot.className   = 'q-dot'
+      dot.textContent = i + 1
+      dot.id          = `dot-${i}`
+      dot.onclick     = () => jumpTo(i)
+      grid.appendChild(dot)
+    })
+  }
+
+  function updateGrid() {
+    questions.forEach((_, i) => {
+      const dot = document.getElementById(`dot-${i}`)
+      if (!dot) return
+      dot.className = 'q-dot'
+      if (i === currentIndex)   dot.classList.add('current')
+      else if (answers[i])      dot.classList.add('answered')
+      if (marked.has(i))        dot.classList.add('marked')
+    })
+  }
+
+  function updateStats() {
+    const answered = Object.keys(answers).length
+    const total    = questions.length
+    document.getElementById('answeredCount').textContent = answered
+    document.getElementById('skippedCount').textContent  = total - answered
+    document.getElementById('markedCount').textContent   = marked.size
+  }
+
+  /* ════════════════════════════════════════════════
+     TIMER
+  ════════════════════════════════════════════════ */
+  function startTimer() {
+    if (timerInterval) clearInterval(timerInterval)
+    timerInterval = setInterval(() => {
+      if (hasSubmitted) return
+      secondsLeft--
+      updateTimerDisplay()
+      if (secondsLeft <= 0) {
+        clearInterval(timerInterval)
+        submitTest(true)
+      }
+    }, 1000)
+    updateTimerDisplay()
+  }
+
+  function updateTimerDisplay() {
+    const m = Math.floor(secondsLeft / 60)
+    const s = secondsLeft % 60
+    document.getElementById('timerDisplay').textContent = `${pad(m)}:${pad(s)}`
+    const timer = document.getElementById('timer')
+    timer.className = 'timer'
+    if (secondsLeft <= 120)      timer.classList.add('danger')
+    else if (secondsLeft <= 300) timer.classList.add('warning')
+  }
+
+  function pad(n) { return String(n).padStart(2,'0') }
+
+  /* ════════════════════════════════════════════════
+     SUBMIT
+  ════════════════════════════════════════════════ */
+  function calculateResult() {
+    let correct = 0, wrong = 0, skipped = 0
+    questions.forEach((q, i) => {
+      const sel   = (answers[i] || '').trim().toLowerCase()
+      const right = (q.correct  || '').trim().toLowerCase()
+      if (!sel)           skipped++
+      else if (sel===right) correct++
+      else                wrong++
+    })
+    return { correct, wrong, skipped, score: Math.round(correct/questions.length*100) }
+  }
+
+  async function submitTest(isTimeUp = false) {
+    if (hasSubmitted) return
+    clearInterval(timerInterval)
+    hasSubmitted = true
+
+    const btn = document.getElementById('submitTestBtn')
+    btn.disabled    = true
+    btn.textContent = 'Submitted'
+
+    const result = calculateResult()
+
+    document.getElementById('scoreVal').textContent   = result.score + '%'
+    document.getElementById('correctVal').textContent = result.correct
+    document.getElementById('wrongVal').textContent   = result.wrong
+    document.getElementById('skippedVal').textContent = result.skipped
+    document.getElementById('resultModal').style.display = 'flex'
+
+    if (isTimeUp) showToast('Time is up! Test auto-submitted.', 'error')
+  }
+
+  function reviewAnswers() {
+    reviewMode = true
+    document.getElementById('resultModal').style.display   = 'none'
+    document.getElementById('submitTestBtn').style.display = 'none'
+    document.getElementById('reviewBanner').classList.add('show')
+    currentIndex = 0
+    renderQuestion()
+  }
+
+  /* ════════════════════════════════════════════════
+     HELPERS
+  ════════════════════════════════════════════════ */
+  function showState(state) {
+    document.getElementById('loadingState').style.display   = state==='loading' ? 'flex'  : 'none'
+    document.getElementById('errorState').style.display     = state==='error'   ? 'flex'  : 'none'
+    document.getElementById('questionContent').style.display= state==='content' ? 'flex'  : 'none'
+  }
+
+  function showToast(msg, type='success') {
+    const t = document.createElement('div')
+    t.className = `save-toast ${type}`
+    t.textContent = msg
+    document.body.appendChild(t)
+    requestAnimationFrame(() => t.classList.add('show'))
+    setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(),250) }, 2800)
+  }
+
+  /* ════════════════════════════════════════════════
+     RESIZER (drag to resize passage / question panels)
+  ════════════════════════════════════════════════ */
+  (() => {
+    const resizer  = document.getElementById('resizer')
+    const left     = document.getElementById('passagePanel')
+    const layout   = document.getElementById('splitLayout')
+    let dragging   = false
+    let startX, startW
+
+    resizer.addEventListener('mousedown', e => {
+      dragging = true
+      startX   = e.clientX
+      startW   = left.offsetWidth
+      document.body.style.cursor    = 'col-resize'
+      document.body.style.userSelect= 'none'
+    })
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return
+      const delta  = e.clientX - startX
+      const newW   = Math.max(260, Math.min(startW + delta, layout.offsetWidth - 320))
+      left.style.width = newW + 'px'
+    })
+    document.addEventListener('mouseup', () => {
+      if (!dragging) return
+      dragging = false
+      document.body.style.cursor     = ''
+      document.body.style.userSelect = ''
+    })
+  })()
+
+  /* counter pill grid toggle (mobile feel) */
+  function toggleGrid() {
+    const sidebar = document.querySelector('.sidebar')
+    if (sidebar) {
+      sidebar.style.display = sidebar.style.display === 'none' ? '' : (
+        getComputedStyle(sidebar).display === 'none' ? 'flex' : 'none'
+      )
+    }
+  }
+  </script>
+</body>
+</html>
