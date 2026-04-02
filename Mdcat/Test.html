@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MDCAT Tests | OpenPrep</title>
+  <meta name="description" content="Practice MDCAT tests with a timed interface, progress tracking, and instant result insights for chemistry and other subjects."/>
+  <meta name="keywords" content="MDCAT tests, MDCAT practice,MDCAT Physics,MDCAT Biology,MDCAT English, MDCAT chemistry, MDCAT entry test, OpenPrep practice test"/>
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"/>
+  <link rel="canonical" href="https://openprep.me/IBA-Karachi/Question_Bank.html"/>
+
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="OpenPrep"/>
+  <meta property="og:title" content="MDCAT Tests| OpenPrep"/>
+  <meta property="og:description" content="Solve MDCAT question bank MCQs with timer, question map, and result analytics on OpenPrep."/>
+  <meta property="og:url" content="https://openprep.me/IBA-Karachi/Question_Bank.html"/>
+  <meta property="og:image" content="https://openprep.me/web-app-manifest-512x512.png"/>
+
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="MDCAT Tests Practice | OpenPrep"/>
+  <meta name="twitter:description" content="Timed MDCAT practice with progress tracking and instant scoring."/>
+  <meta name="twitter:image" content="https://openprep.me/web-app-manifest-512x512.png"/>
+
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "MDCAT Tests Practice | OpenPrep",
+      "url": "https://openprep.me/IBA-Karachi/Question_Bank.html",
+      "description": "Practice MDCAT question bank MCQs with timed solving and instant results.",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "OpenPrep",
+        "url": "https://openprep.me/"
+      },
+      "inLanguage": "en"
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/IBA-Karachi/test.css"/>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="logo">Open<span>Prep</span></a>
+    <div class="nav-center">
+      <span class="paper-title" id="paperTitle">Loading…</span>
+    </div>
+    <div class="nav-right">
+      <div class="timer" id="timer">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span id="timerDisplay">2:00:00</span>
+      </div>
+      <button class="btn-submit-test" id="submitTestBtn" onclick="submitTest()">Submit test</button>
+    </div>
+  </nav>
+
+  <!-- PROGRESS BAR (top) -->
+  <div class="top-progress">
+    <div class="top-progress-fill" id="topProgressFill" style="width:0%"></div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="layout">
+
+    <!-- LEFT: QUESTION PANEL -->
+    <main class="question-panel">
+
+      <!-- loading state -->
+      <div class="loading-state" id="loadingState">
+        <div class="spinner"></div>
+        <p>Loading questions from Supabase…</p>
+      </div>
+
+      <!-- error state -->
+      <div class="error-state" id="errorState" style="display:none">
+        <p id="errorMsg">Something went wrong. Please try again.</p>
+        <button onclick="loadQuestions()">Retry</button>
+      </div>
+
+      <!-- question content -->
+      <div class="question-content" id="questionContent" style="display:none">
+
+        <div class="q-meta">
+          <span class="q-subject" id="qSubject"></span>
+          <span class="q-counter">Question <strong id="qNum">1</strong> of <strong id="qTotal">90</strong></span>
+        </div>
+
+        <div class="q-text" id="qText"></div>
+
+        <!-- MCQ OPTIONS -->
+        <div class="options-list" id="optionsList"></div>
+
+        <!-- NAVIGATION -->
+        <div class="q-nav">
+          <button class="btn-nav" id="prevBtn" onclick="prevQuestion()" disabled>← Previous</button>
+          <button class="btn-nav btn-nav-next" id="nextBtn" onclick="nextQuestion()">Next →</button>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- RIGHT: SIDEBAR -->
+    <aside class="sidebar">
+
+      <div class="sidebar-header">
+        <span class="sidebar-title">Question map</span>
+        <div class="legend">
+          <span class="legend-item"><span class="dot answered"></span>Answered</span>
+          <span class="legend-item"><span class="dot current"></span>Current</span>
+          <span class="legend-item"><span class="dot unanswered"></span>Skipped</span>
+        </div>
+      </div>
+
+      <div class="q-grid" id="qGrid"></div>
+
+      <div class="sidebar-stats">
+        <div class="sstat">
+          <span class="sstat-val" id="answeredCount">0</span>
+          <span class="sstat-label">Answered</span>
+        </div>
+        <div class="sstat">
+          <span class="sstat-val" id="skippedCount">0</span>
+          <span class="sstat-label">Skipped</span>
+        </div>
+        <div class="sstat">
+          <span class="sstat-val" id="remainingCount">90</span>
+          <span class="sstat-label">Remaining</span>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- RESULT MODAL -->
+  <div class="modal-overlay" id="resultModal" style="display:none">
+    <div class="modal">
+      <div class="modal-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <h2>Test submitted!</h2>
+      <p>Here's how you did on this paper.</p>
+      <div class="result-stats">
+        <div class="result-stat">
+          <span class="result-val" id="scoreVal">0</span>
+          <span class="result-label">Score</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-val" id="correctVal">0</span>
+          <span class="result-label">Correct</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-val" id="wrongVal">0</span>
+          <span class="result-label">Wrong</span>
+        </div>
+        <div class="result-stat">
+          <span class="result-val" id="skippedVal">0</span>
+          <span class="result-label">Skipped</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-review" onclick="reviewAnswers()">Review answers</button>
+        <a href="/IBA-Karachi/IBA_Math.html" class="btn-back">Back to papers</a>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../supabase.js"></script>
+  <script src="Test.js"></script>
+
+  
+</body>
+<footer>
+    <p>OpenPrep — free forever, open source always</p>
+    <p>Made with care by Mehdi Ali Qoli at IBA Karachi</p>
+  </footer>
+</html>
